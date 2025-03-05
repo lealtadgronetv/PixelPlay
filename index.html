@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Clientes</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .menu { margin-bottom: 20px; }
+        .menu a { margin-right: 15px; text-decoration: none; font-weight: bold; }
+        .section { display: none; }
+        .active { display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        button { margin-top: 10px; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+    <h2>Gestión de Clientes</h2>
+    <div class="menu">
+        <a href="#" onclick="mostrarSeccion('soporte')">Soporte</a>
+        <a href="#" onclick="mostrarSeccion('ventas')">Ventas</a>
+    </div>
+
+    <!-- Sección Soporte -->
+    <div id="soporte" class="section active">
+        <h3>Soporte</h3>
+        <table id="soporteTable">
+            <tr>
+                <th>Cliente</th><th>Correo</th><th>Contraseña</th><th>Plataforma</th><th>Perfil</th><th>Fecha Corte</th><th>Acción</th>
+            </tr>
+        </table>
+        <button onclick="agregarCliente()">Agregar Cliente</button>
+        
+        <h3>Reportar Cuenta Caída</h3>
+        <input type="text" id="correoAntiguo" placeholder="Correo Antiguo">
+        <input type="text" id="correoNuevo" placeholder="Correo Nuevo">
+        <button onclick="actualizarCorreo()">Actualizar</button>
+    </div>
+    
+    <!-- Sección Ventas -->
+    <div id="ventas" class="section">
+        <h3>Ventas</h3>
+        <table id="ventasTable">
+            <tr>
+                <th>Cliente</th><th>Correo</th><th>Fecha Vencimiento</th><th>Renovado</th><th>Acción</th>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        let clientes = [];
+
+        function mostrarSeccion(seccion) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(seccion).classList.add('active');
+        }
+
+        function agregarCliente() {
+            let nombre = prompt("Nombre del cliente:");
+            let correo = prompt("Correo:");
+            let contraseña = prompt("Contraseña:");
+            let plataforma = prompt("Plataforma:");
+            let perfil = prompt("Perfil:");
+            let fechaCorte = prompt("Fecha de corte (YYYY-MM-DD):");
+            
+            let cliente = { nombre, correo, contraseña, plataforma, perfil, fechaCorte, renovado: false };
+            clientes.push(cliente);
+            actualizarTablas();
+        }
+
+        function renovarCliente(index) {
+            clientes[index].renovado = true;
+            actualizarTablas();
+        }
+
+        function actualizarCorreo() {
+            let antiguo = document.getElementById("correoAntiguo").value;
+            let nuevo = document.getElementById("correoNuevo").value;
+            
+            let cliente = clientes.find(c => c.correo === antiguo);
+            if (cliente) {
+                cliente.correo = nuevo;
+                actualizarTablas();
+                alert("Correo actualizado correctamente.");
+            } else {
+                alert("Correo antiguo no encontrado.");
+            }
+        }
+
+        function actualizarTablas() {
+            let soporteTable = document.getElementById("soporteTable");
+            let ventasTable = document.getElementById("ventasTable");
+            soporteTable.innerHTML = ventasTable.innerHTML = '';
+            
+            soporteTable.innerHTML = '<tr><th>Cliente</th><th>Correo</th><th>Contraseña</th><th>Plataforma</th><th>Perfil</th><th>Fecha Corte</th><th>Acción</th></tr>';
+            ventasTable.innerHTML = '<tr><th>Cliente</th><th>Correo</th><th>Fecha Vencimiento</th><th>Renovado</th><th>Acción</th></tr>';
+            
+            clientes.forEach((c, index) => {
+                let soporteRow = `<tr>
+                    <td>${c.nombre}</td>
+                    <td>${c.correo}</td>
+                    <td>${c.contraseña}</td>
+                    <td>${c.plataforma}</td>
+                    <td>${c.perfil}</td>
+                    <td>${c.fechaCorte}</td>
+                    <td><button onclick="renovarCliente(${index})">Renovar</button></td>
+                </tr>`;
+                
+                let ventasRow = `<tr>
+                    <td>${c.nombre}</td>
+                    <td>${c.correo}</td>
+                    <td>${c.fechaCorte}</td>
+                    <td>${c.renovado ? 'Sí' : 'No'}</td>
+                    <td><button onclick="renovarCliente(${index})">Renovar</button></td>
+                </tr>`;
+                
+                soporteTable.innerHTML += soporteRow;
+                ventasTable.innerHTML += ventasRow;
+            });
+        }
+    </script>
+</body>
+</html>
