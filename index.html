@@ -3,58 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ventas y Soporte</title>
+    <title>Sistema de Soporte y Ventas</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <nav>
-        <button onclick="mostrarSeccion('soporte')">Soporte</button>
-        <button onclick="mostrarSeccion('ventas')">Ventas</button>
-    </nav>
+    <div class="header">
+        <h1>Sistema de Gestión de Servicios</h1>
+    </div>
     
-    <section id="soporte" style="display: none;">
-        <h2>Soporte</h2>
-        <form id="form-cuenta">
-            <input type="email" id="correo" placeholder="Correo" required>
-            <input type="password" id="contraseña" placeholder="Contraseña" required>
-            <input type="text" id="plataforma" placeholder="Plataforma" required>
-            <input type="number" id="perfiles" placeholder="Perfiles" required>
-            <button type="submit">Agregar Cuenta</button>
-        </form>
-    </section>
-
-    <section id="ventas" style="display: none;">
-        <h2>Ventas</h2>
-        <p>Aquí se mostrarán los clientes y cuentas disponibles.</p>
-    </section>
-
-    <script type="module">
-        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-        const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        window.mostrarSeccion = function (seccion) {
-            document.getElementById("soporte").style.display = seccion === "soporte" ? "block" : "none";
-            document.getElementById("ventas").style.display = seccion === "ventas" ? "block" : "none";
-        };
-
-        document.getElementById("form-cuenta").addEventListener("submit", async function (event) {
-            event.preventDefault();
-            const correo = document.getElementById("correo").value;
-            const contraseña = document.getElementById("contraseña").value;
-            const plataforma = document.getElementById("plataforma").value;
-            const perfiles = document.getElementById("perfiles").value;
-
-            let { error } = await supabase.from("cuentas").insert([{ correo, contraseña, plataforma, perfiles }]);
-            if (error) {
-                alert("Error al guardar la cuenta: " + error.message);
-            } else {
-                alert("Cuenta agregada correctamente");
-                document.getElementById("form-cuenta").reset();
-            }
-        });
-    </script>
+    <div class="menu">
+        <button id="btnSoporte" class="active">Soporte</button>
+        <button id="btnVentas">Ventas</button>
+    </div>
+    
+    <div class="container">
+        <!-- Panel de Soporte -->
+        <div id="panelSoporte" class="panel" style="display: block;">
+            <h2>Gestión de Soporte</h2>
+            
+            <div class="form-group">
+                <button id="btnNuevoCliente">Nuevo Cliente</button>
+                <button id="btnAsignarCuenta">Asignar Cuenta</button>
+                <button id="btnMoverPerfiles">Mover Perfiles</button>
+                <button id="btnReemplazo">Generar Reemplazo</button>
+            </div>
+            
+            <div id="formNuevoCliente" style="display: none;">
+                <h3>Nuevo Cliente</h3>
+                <div class="form-group">
+                    <label for="clienteCorreo">Correo del Cliente:</label>
+                    <input type="email" id="clienteCorreo" required>
+                </div>
+                <div class="form-group">
+                    <label for="clienteContraseña">Contraseña:</label>
+                    <input type="password" id="clienteContraseña" required>
+                </div>
+                <div class="form-group">
+                    <label for="plataforma">Plataforma:</label>
+                    <select id="plataforma">
+                        <option value="Netflix">Netflix</option>
+                        <option value="Disney+">Disney+</option>
+                        <option value="HBO Max">HBO Max</option>
+                        <option value="Amazon Prime">Amazon Prime</option>
+                        <option value="Spotify">Spotify</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cantidadPerfiles">Cantidad de Perfiles:</label>
+                    <input type="number" id="cantidadPerfiles" min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label for="diasReposicion">Días de Reposición (opcional):</label>
+                    <input type="number" id="diasReposicion" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="fechaVencimiento">Fecha de Vencimiento:</label>
+                    <input type="date" id="fechaVencimiento">
+                </div>
+                <button id="guardarCliente">Guardar Cliente</button>
+            </div>
+            
+            <div id="formAsignarCuenta" style="display: none;">
+                <h3>Asignar Cuenta a Cliente</h3>
+                <div class="form-group">
+                    <label for="cuentaCorreo">Correo de la Cuenta:</label>
+                    <input type="email" id="cuentaCorreo" required>
+                </div>
+                <div class="form-group">
+                    <label for="cuentaContraseña">Contraseña:</label>
+                    <input type="password" id="cuentaContraseña" required>
+                </div>
+                <div class="form-group">
+                    <label for="nombrePerfil">Nombre del Perfil:</label>
+                    <input type="text" id="nombrePerfil">
+                </div>
+                <div class="form-group">
+                    <label for="pinPerfil">PIN (si aplica):</label>
+                    <input type="text" id="pinPerfil">
+                </div>
+                <div class="form-group">
+                    <label for="asignarCliente">Asignar a Cliente:</label>
+                    <select id="asignarCliente">
+                        <option value="">Seleccione un cliente...</option>
+                    </select>
+                </div>
+                <button id="guardarAsignacion">Guardar Asignación</button>
+            </div>
+            
+            <div id="formMoverPerfiles" style="display: none;">
+                <h3>Mover Perfiles</h3>
+                <div class="form-group">
+                    <label for="perfilOrigen">Perfil Origen:</label>
+                    <select id="perfilOrigen">
+                        <option value="">Seleccione un perfil...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="clienteDestino">Cliente Destino:</label>
+                    <select id="clienteDestino">
+                        <option value="">Seleccione un cliente...</option>
+                    </select>
+                </div>
+                <div id="confirmacionMovimiento" class="status alert" style="display: none;">
+                    <p>¿Está seguro de mover el perfil <span id="nombrePerfilMover"></span> del cliente <span id="clienteOrigenMover"></span> al cliente <span id="clienteDestinoMover"></span>?</p>
+                    <button id="confirmarMovimiento">Confirmar Movimiento</button>
+                </div>
+                <button id="verificarMovimiento">Verificar Movimiento</button>
+            </div>
+            
+            <div id="formReemplazo" style="display: none;">
+                <h3>Generar Mensaje de Reemplazo</h3>
+                <div class="form-group">
+                    <label for="cuentaReemplazo">Seleccionar Cuenta:</label>
+                    <select id="cuentaReemplazo">
+                        <option value="">Seleccione una cuenta...</option>
+                    </select>
+                </div>
+                <button id="generarReemplazo">Generar Mensaje</button>
+                <div id="mensajeReemplazo" style="display: none;">
+                    <h4>Mensaje de Reemplazo</h4>
+                    <textarea id="textoReemplazo" rows="8" readonly></textarea>
+                    <button id="copiarMensaje">Copiar Mensaje</button>
+                </div>
+            </div>
+            
+            <h3>Listado de Clientes</h3>
+            <table id="tablaClientes">
+                <thead>
+                    <tr>
+                        <th>Correo</th>
+                        <th>Plataforma</th>
+                        <th>Perfiles</th>
+                        <th>Días Reposición</th>
+                        <th>Vencimiento</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se cargarán los clientes -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Panel de Ventas -->
+        <div id="panelVentas" class="panel">
+            <h2>Gestión de Ventas</h2>
+            
+            <div class="form-group">
+                <label for="filtroPlataforma">Filtrar por Plataforma:</label>
+                <select id="filtroPlataforma">
+                    <option value="todas">Todas las plataformas</option>
+                    <option value="Netflix">Netflix</option>
+                    <option value="Disney+">Disney+</option>
+                    <option value="HBO Max">HBO Max</option>
+                    <option value="Amazon Prime">Amazon Prime</option>
+                    <option value="Spotify">Spotify</option>
+                </select>
+            </div>
+            
+            <h3>Cuentas con Espacios Disponibles</h3>
+            <table id="tablaCuentasDisponibles">
+                <thead>
+                    <tr>
+                        <th>Plataforma</th>
+                        <th>Correo</th>
+                        <th>Perfiles Usados</th>
+                        <th>Perfiles Disponibles</th>
+                        <th>Vencimiento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se cargarán las cuentas disponibles -->
+                </tbody>
+            </table>
+            
+            <h3>Movimientos de Perfiles</h3>
+            <table id="tablaMovimientos">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Perfil</th>
+                        <th>Origen</th>
+                        <th>Destino</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se cargarán los movimientos -->
+                </tbody>
+            </table>
+            
+            <h3>Próximos Vencimientos</h3>
+            <table id="tablaVencimientos">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Plataforma</th>
+                        <th>Fecha Vencimiento</th>
+                        <th>Días Restantes</th>
+                        <th>Reposición</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se cargarán los vencimientos -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Modal para mensajes -->
+    <div id="modalMensaje" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="mensajeModal"></p>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
 </body>
 </html>
 
