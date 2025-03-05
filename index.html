@@ -3,39 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Clientes</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .menu { margin-bottom: 20px; }
-        .menu a { margin-right: 15px; text-decoration: none; font-weight: bold; cursor: pointer; }
-        .section { display: none; }
-        .active { display: block; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        button { margin-top: 10px; padding: 5px 10px; }
-    </style>
+    <title>Ventas y Soporte</title>
+    <script type="module" defer>
+        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+        // ⚠️ Reemplaza con tus propias credenciales
+        const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function cargarProductos() {
+            let { data, error } = await supabase.from("productos").select("*");
+
+            if (error) {
+                console.error("Error cargando productos:", error);
+                return;
+            }
+
+            const listaProductos = document.getElementById("lista-productos");
+            listaProductos.innerHTML = "";
+
+            data.forEach(producto => {
+                const item = document.createElement("li");
+                item.textContent = `${producto.nombre} - $${producto.precio}`;
+                listaProductos.appendChild(item);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", cargarProductos);
+    </script>
 </head>
 <body>
-    <h2>Gestión de Clientes</h2>
-    <div class="menu">
-        <a onclick="mostrarSeccion('clientes')">Clientes</a>
-    </div>
-
-    <div id="clientes" class="section active">
-        <h3>Lista de Clientes</h3>
-        <table id="clientesTable">
-            <tr>
-                <th>Nombre</th><th>Email</th><th>Teléfono</th>
-            </tr>
-        </table>
-        <button onclick="agregarCliente()">Agregar Cliente</button>
-    </div>
-
-    <script>
-        function mostrarSeccion(seccion) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(seccion).classList.add('active');
-        }
-    </script>
+    <h1>Tienda Online</h1>
+    <ul id="lista-productos">
+        <li>Cargando productos...</li>
+    </ul>
 </body>
 </html>
