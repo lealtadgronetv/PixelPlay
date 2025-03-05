@@ -7,37 +7,53 @@
     <script type="module" defer>
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-        // ⚠️ Reemplaza con tus propias credenciales
-        const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
-
+        const SUPABASE_URL = "TU_SUPABASE_URL";
+        const SUPABASE_KEY = "TU_SUPABASE_API_KEY";
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function cargarProductos() {
-            let { data, error } = await supabase.from("productos").select("*");
-
-            if (error) {
-                console.error("Error cargando productos:", error);
-                return;
-            }
-
-            const listaProductos = document.getElementById("lista-productos");
-            listaProductos.innerHTML = "";
-
-            data.forEach(producto => {
-                const item = document.createElement("li");
-                item.textContent = `${producto.nombre} - $${producto.precio}`;
-                listaProductos.appendChild(item);
-            });
+        function mostrarSeccion(seccion) {
+            document.getElementById("soporte").style.display = seccion === "soporte" ? "block" : "none";
+            document.getElementById("ventas").style.display = seccion === "ventas" ? "block" : "none";
         }
 
-        document.addEventListener("DOMContentLoaded", cargarProductos);
+        async function agregarCuenta(event) {
+            event.preventDefault();
+            const correo = document.getElementById("correo").value;
+            const contraseña = document.getElementById("contraseña").value;
+            const plataforma = document.getElementById("plataforma").value;
+            const perfiles = document.getElementById("perfiles").value;
+
+            let { error } = await supabase.from("cuentas").insert([{ correo, contraseña, plataforma, perfiles }]);
+            if (error) {
+                alert("Error al guardar la cuenta");
+            } else {
+                alert("Cuenta agregada correctamente");
+                document.getElementById("form-cuenta").reset();
+            }
+        }
     </script>
 </head>
 <body>
-    <h1>Tienda Online</h1>
-    <ul id="lista-productos">
-        <li>Cargando productos...</li>
-    </ul>
+    <nav>
+        <button onclick="mostrarSeccion('soporte')">Soporte</button>
+        <button onclick="mostrarSeccion('ventas')">Ventas</button>
+    </nav>
+    
+    <section id="soporte" style="display: none;">
+        <h2>Soporte</h2>
+        <form id="form-cuenta" onsubmit="agregarCuenta(event)">
+            <input type="email" id="correo" placeholder="Correo" required>
+            <input type="password" id="contraseña" placeholder="Contraseña" required>
+            <input type="text" id="plataforma" placeholder="Plataforma" required>
+            <input type="number" id="perfiles" placeholder="Perfiles" required>
+            <button type="submit">Agregar Cuenta</button>
+        </form>
+    </section>
+
+    <section id="ventas" style="display: none;">
+        <h2>Ventas</h2>
+        <p>Aquí se mostrarán los clientes y cuentas disponibles.</p>
+    </section>
 </body>
 </html>
+
