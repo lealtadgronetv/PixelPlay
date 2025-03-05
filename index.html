@@ -25,7 +25,7 @@
 
             let { error } = await supabase.from("cuentas").insert([{ correo, contraseña, plataforma, perfiles }]);
             if (error) {
-                alert("Error al guardar la cuenta");
+                alert("Error al guardar la cuenta: " + error.message);
             } else {
                 alert("Cuenta agregada correctamente");
                 document.getElementById("form-cuenta").reset();
