@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Clientes y Cuentas</title>
+    <title>Gestión de Clientes</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .menu { margin-bottom: 20px; }
@@ -16,140 +16,25 @@
     </style>
 </head>
 <body>
-    <h2>Gestión de Clientes y Cuentas</h2>
+    <h2>Gestión de Clientes</h2>
     <div class="menu">
-        <a onclick="mostrarSeccion('cuentas')">Cuentas Disponibles</a>
-        <a onclick="mostrarSeccion('soporte')">Soporte</a>
-        <a onclick="mostrarSeccion('ventas')">Ventas</a>
+        <a onclick="mostrarSeccion('clientes')">Clientes</a>
     </div>
 
-    <!-- Sección Cuentas Disponibles -->
-    <div id="cuentas" class="section active">
-        <h3>Cuentas Disponibles</h3>
-        <table id="cuentasTable">
+    <div id="clientes" class="section active">
+        <h3>Lista de Clientes</h3>
+        <table id="clientesTable">
             <tr>
-                <th>Correo</th><th>Contraseña</th><th>Estado</th><th>Acción</th>
-            </tr>
-        </table>
-        <button onclick="agregarCuenta()">Agregar Cuenta</button>
-    </div>
-
-    <!-- Sección Soporte -->
-    <div id="soporte" class="section">
-        <h3>Soporte</h3>
-        <table id="soporteTable">
-            <tr>
-                <th>Cliente</th><th>Teléfono</th><th>Correo Asignado</th><th>Perfil</th><th>Fecha Corte</th><th>Días Extra</th><th>Acción</th>
+                <th>Nombre</th><th>Email</th><th>Teléfono</th>
             </tr>
         </table>
         <button onclick="agregarCliente()">Agregar Cliente</button>
-        
-        <h3>Reasignar Cliente</h3>
-        <input type="text" id="clienteReasignar" placeholder="Nombre Cliente">
-        <input type="text" id="nuevoCorreo" placeholder="Nuevo Correo">
-        <button onclick="reasignarCliente()">Reasignar</button>
-    </div>
-    
-    <!-- Sección Ventas -->
-    <div id="ventas" class="section">
-        <h3>Ventas</h3>
-        <table id="ventasTable">
-            <tr>
-                <th>Cliente</th><th>Teléfono</th><th>Correo Asignado</th><th>Fecha Vencimiento</th><th>Días Extra</th><th>Renovado</th><th>Acción</th>
-            </tr>
-        </table>
     </div>
 
     <script>
-        let cuentas = [];
-        let clientes = [];
-
         function mostrarSeccion(seccion) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(seccion).classList.add('active');
-        }
-
-        function agregarCuenta() {
-            let correo = prompt("Correo de la cuenta:");
-            let contraseña = prompt("Contraseña:");
-            let estado = "Activa";
-            
-            cuentas.push({ correo, contraseña, estado });
-            actualizarTablas();
-        }
-
-        function agregarCliente() {
-            let nombre = prompt("Nombre del cliente:");
-            let telefono = prompt("Teléfono del cliente:");
-            let correoAsignado = prompt("Correo asignado:");
-            let perfil = prompt("Perfil:");
-            let fechaCorte = prompt("Fecha de corte (YYYY-MM-DD):");
-            let diasExtra = prompt("Días extra (si aplica):", "0");
-            
-            let cliente = { nombre, telefono, correoAsignado, perfil, fechaCorte, diasExtra, renovado: false };
-            clientes.push(cliente);
-            actualizarTablas();
-        }
-
-        function reasignarCliente() {
-            let nombre = document.getElementById("clienteReasignar").value;
-            let nuevoCorreo = document.getElementById("nuevoCorreo").value;
-            
-            let cliente = clientes.find(c => c.nombre === nombre);
-            if (cliente) {
-                cliente.correoAsignado = nuevoCorreo;
-                generarMensaje(cliente);
-                actualizarTablas();
-                alert("Cliente reasignado correctamente.");
-            } else {
-                alert("Cliente no encontrado.");
-            }
-        }
-
-        function renovarCliente(index) {
-            clientes[index].renovado = true;
-            actualizarTablas();
-        }
-
-        function generarMensaje(cliente) {
-            let mensaje = `🛡 Hola ${cliente.nombre}, Se actualizó el correo y contraseña de su plataforma por seguridad:\n\n` +
-                          `📧Correo.     : ${cliente.correoAsignado}\n` +
-                          `🔐Clave.       : (Ingresar contraseña aquí)\n` +
-                          `👥Perfil.        : ${cliente.perfil}\n` +
-                          `🗝Pin.           : (Si aplica)`;
-            console.log(mensaje);
-            alert(mensaje);
-        }
-
-        function actualizarTablas() {
-            let cuentasTable = document.getElementById("cuentasTable");
-            let soporteTable = document.getElementById("soporteTable");
-            let ventasTable = document.getElementById("ventasTable");
-            
-            cuentasTable.innerHTML = '<tr><th>Correo</th><th>Contraseña</th><th>Estado</th><th>Acción</th></tr>';
-            soporteTable.innerHTML = '<tr><th>Cliente</th><th>Teléfono</th><th>Correo Asignado</th><th>Perfil</th><th>Fecha Corte</th><th>Días Extra</th><th>Acción</th></tr>';
-            ventasTable.innerHTML = '<tr><th>Cliente</th><th>Teléfono</th><th>Correo Asignado</th><th>Fecha Vencimiento</th><th>Días Extra</th><th>Renovado</th><th>Acción</th></tr>';
-            
-            cuentas.forEach((c, index) => {
-                cuentasTable.innerHTML += `<tr>
-                    <td>${c.correo}</td>
-                    <td>${c.contraseña}</td>
-                    <td>${c.estado}</td>
-                    <td><button onclick="cambiarEstadoCuenta(${index})">Cambiar Estado</button></td>
-                </tr>`;
-            });
-            
-            clientes.forEach((c, index) => {
-                soporteTable.innerHTML += `<tr>
-                    <td>${c.nombre}</td>
-                    <td>${c.telefono}</td>
-                    <td>${c.correoAsignado}</td>
-                    <td>${c.perfil}</td>
-                    <td>${c.fechaCorte}</td>
-                    <td>${c.diasExtra}</td>
-                    <td><button onclick="renovarCliente(${index})">Renovar</button></td>
-                </tr>`;
-            });
         }
     </script>
 </body>
