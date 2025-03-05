@@ -4,19 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ventas y Soporte</title>
-    <script type="module" defer>
+</head>
+<body>
+    <nav>
+        <button onclick="mostrarSeccion('soporte')">Soporte</button>
+        <button onclick="mostrarSeccion('ventas')">Ventas</button>
+    </nav>
+    
+    <section id="soporte" style="display: none;">
+        <h2>Soporte</h2>
+        <form id="form-cuenta">
+            <input type="email" id="correo" placeholder="Correo" required>
+            <input type="password" id="contraseña" placeholder="Contraseña" required>
+            <input type="text" id="plataforma" placeholder="Plataforma" required>
+            <input type="number" id="perfiles" placeholder="Perfiles" required>
+            <button type="submit">Agregar Cuenta</button>
+        </form>
+    </section>
+
+    <section id="ventas" style="display: none;">
+        <h2>Ventas</h2>
+        <p>Aquí se mostrarán los clientes y cuentas disponibles.</p>
+    </section>
+
+    <script type="module">
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
         const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        function mostrarSeccion(seccion) {
+        window.mostrarSeccion = function (seccion) {
             document.getElementById("soporte").style.display = seccion === "soporte" ? "block" : "none";
             document.getElementById("ventas").style.display = seccion === "ventas" ? "block" : "none";
-        }
+        };
 
-        async function agregarCuenta(event) {
+        document.getElementById("form-cuenta").addEventListener("submit", async function (event) {
             event.preventDefault();
             const correo = document.getElementById("correo").value;
             const contraseña = document.getElementById("contraseña").value;
@@ -30,30 +53,8 @@
                 alert("Cuenta agregada correctamente");
                 document.getElementById("form-cuenta").reset();
             }
-        }
+        });
     </script>
-</head>
-<body>
-    <nav>
-        <button onclick="mostrarSeccion('soporte')">Soporte</button>
-        <button onclick="mostrarSeccion('ventas')">Ventas</button>
-    </nav>
-    
-    <section id="soporte" style="display: none;">
-        <h2>Soporte</h2>
-        <form id="form-cuenta" onsubmit="agregarCuenta(event)">
-            <input type="email" id="correo" placeholder="Correo" required>
-            <input type="password" id="contraseña" placeholder="Contraseña" required>
-            <input type="text" id="plataforma" placeholder="Plataforma" required>
-            <input type="number" id="perfiles" placeholder="Perfiles" required>
-            <button type="submit">Agregar Cuenta</button>
-        </form>
-    </section>
-
-    <section id="ventas" style="display: none;">
-        <h2>Ventas</h2>
-        <p>Aquí se mostrarán los clientes y cuentas disponibles.</p>
-    </section>
 </body>
 </html>
 
