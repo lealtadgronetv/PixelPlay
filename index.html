@@ -9,8 +9,13 @@
     <h2>Agregar Cuenta</h2>
     <form id="form-cuenta">
         <input type="email" id="correo" placeholder="Correo" required>
+        <input type="password" id="contraseña" placeholder="Contraseña" required>
+        <input type="text" id="plataforma" placeholder="Plataforma" required>
+        <input type="number" id="perfiles" placeholder="Perfiles" required>
         <button type="submit">Guardar</button>
     </form>
+
+    <p id="mensaje"></p>
 
     <script type="module">
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
@@ -22,15 +27,20 @@
         document.getElementById("form-cuenta").addEventListener("submit", async function (event) {
             event.preventDefault();
             const correo = document.getElementById("correo").value;
+            const contraseña = document.getElementById("contraseña").value;
+            const plataforma = document.getElementById("plataforma").value;
+            const perfiles = parseInt(document.getElementById("perfiles").value);
 
-            let { error } = await supabase.from("cuentas").insert([{ correo }]);
+            const { data, error } = await supabase.from("cuentas").insert([{ correo, contraseña, plataforma, perfiles }]);
+
             if (error) {
-                alert("Error al guardar: " + error.message);
+                document.getElementById("mensaje").innerText = "❌ Error: " + error.message;
             } else {
-                alert("Cuenta guardada correctamente");
+                document.getElementById("mensaje").innerText = "✅ Cuenta guardada correctamente";
                 document.getElementById("form-cuenta").reset();
             }
         });
     </script>
 </body>
 </html>
+
