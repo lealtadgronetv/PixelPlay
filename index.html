@@ -3,164 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Cuentas de Streaming</title>
-    <!-- Importando correctamente Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Gestión de Cuentas</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="app.js"></script>
 </head>
 <body>
-    <h1>Panel de Gestión de Cuentas</h1>
-    <button onclick="ingresarCuentaCompleta()">Ingresar Cuenta Completa</button>
-    <button onclick="ingresarCuentaPerfil()">Ingresar Perfil</button>
-    <button onclick="marcarPagada()">Marcar como Pagada</button>
-    <button onclick="marcarVencida()">Marcar como Vencida</button>
-    <button onclick="agregarDias()">Agregar Días</button>
-    <button onclick="verCuentasDisponibles()">Ver Cuentas Disponibles</button>
-    <button onclick="verPerfilesDisponibles()">Ver Perfiles Disponibles</button>
-    <button onclick="liberarPerfiles()">Liberar Perfiles Vencidos</button>
-    <button onclick="notificarSoporte()">Notificar Soporte</button>
-    <button onclick="verTotalCuentas()">Ver Total de Cuentas</button>
-    <button onclick="verTotalPerfiles()">Ver Total de Perfiles</button>
-
-    <script>
-    // 🔹 Configuración de Supabase
-    const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co";  // Reemplázalo con tu URL
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA"; // Reemplázalo con tu clave API
-    const supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // 🔹 Ingresar una cuenta completa a Supabase
-    async function ingresarCuentaCompleta() {
-        let correo = prompt("Ingrese el correo de la nueva cuenta:");
-        if (!correo) return alert("Correo inválido.");
-
-        let { data, error } = await supabase.from("netflix").insert([
-            { correo, perfiles_disponibles: 5, estado: "activa" }
-        ]);
-
-        if (error) {
-            alert("Error al ingresar la cuenta.");
-            console.error(error);
-        } else {
-            alert("Cuenta agregada correctamente.");
-        }
-    }
-
-    // 🔹 Ingresar cuenta por perfil
-    async function ingresarCuentaPerfil() {
-        let cuentaID = prompt("Ingrese el ID de la cuenta:");
-        if (!cuentaID) return alert("ID inválido.");
-
-        let { data, error } = await supabase.from("netflix").select("*").eq("id", cuentaID).single();
-        if (error || !data) return alert("Cuenta no encontrada.");
-
-        if (data.perfiles_disponibles > 0) {
-            let { error: updateError } = await supabase
-                .from("netflix")
-                .update({ perfiles_disponibles: data.perfiles_disponibles - 1 })
-                .eq("id", cuentaID);
-
-            if (updateError) {
-                alert("Error al asignar perfil.");
-                console.error(updateError);
-            } else {
-                alert("Perfil asignado correctamente.");
-            }
-        } else {
-            alert("No hay perfiles disponibles.");
-        }
-    }
-
-    // 🔹 Marcar cuenta como pagada
-    async function marcarPagada() {
-        let cuentaID = prompt("Ingrese el ID de la cuenta:");
-        let { error } = await supabase.from("netflix").update({ estado_pago: "pagado" }).eq("id", cuentaID);
-        error ? alert("Error al actualizar.") : alert("Cuenta marcada como pagada.");
-    }
-
-    // 🔹 Marcar cuenta como vencida
-    async function marcarVencida() {
-        let cuentaID = prompt("Ingrese el ID de la cuenta:");
-        let { error } = await supabase.from("netflix").update({ estado: "vencida" }).eq("id", cuentaID);
-        error ? alert("Error al actualizar.") : alert("Cuenta marcada como vencida.");
-    }
-
-    // 🔹 Agregar días adicionales
-    async function agregarDias() {
-        let cuentaID = prompt("Ingrese el ID de la cuenta:");
-        let dias = parseInt(prompt("Ingrese los días adicionales:"), 10);
-        if (isNaN(dias) || dias <= 0) return alert("Días inválidos.");
-
-        let { data, error } = await supabase.from("netflix").select("dias_reposicion").eq("id", cuentaID).single();
-        if (error || !data) return alert("Cuenta no encontrada.");
-
-        let { error: updateError } = await supabase
-            .from("netflix")
-            .update({ dias_reposicion: data.dias_reposicion + dias })
-            .eq("id", cuentaID);
-
-        updateError ? alert("Error al actualizar.") : alert(`Se agregaron ${dias} días.`);
-    }
-
-    // 🔹 Ver cuentas activas disponibles
-    async function verCuentasDisponibles() {
-        let { data, error } = await supabase.from("netflix").select("*").eq("estado", "activa");
-        if (error) {
-            alert("Error al obtener datos.");
-        } else {
-            alert(`Hay ${data.length} cuentas activas disponibles.`);
-        }
-    }
-
-    // 🔹 Ver perfiles disponibles
-    async function verPerfilesDisponibles() {
-        let { data, error } = await supabase.from("netflix").select("perfiles_disponibles");
-        if (error) {
-            alert("Error al obtener datos.");
-        } else {
-            let totalPerfiles = data.reduce((sum, cuenta) => sum + cuenta.perfiles_disponibles, 0);
-            alert(`Hay ${totalPerfiles} perfiles disponibles.`);
-        }
-    }
-
-    // 🔹 Liberar perfiles vencidos
-    async function liberarPerfiles() {
-        let { error } = await supabase
-            .from("netflix")
-            .update({ perfiles_disponibles: 5 })
-            .eq("estado", "vencida");
-
-        error ? alert("Error al liberar perfiles.") : alert("Perfiles liberados correctamente.");
-    }
-
-    // 🔹 Notificar soporte de cuenta caída
-    async function notificarSoporte() {
-        let cuentaID = prompt("Ingrese el ID de la cuenta caída:");
-        let motivo = prompt("Ingrese el motivo de la caída:");
-        if (!motivo) return alert("Debe ingresar un motivo.");
-
-        let { error } = await supabase.from("netflix").update({ detalles_caida: motivo }).eq("id", cuentaID);
-        error ? alert("Error al notificar soporte.") : alert("Soporte notificado.");
-    }
-
-    // 🔹 Ver total de cuentas registradas
-    async function verTotalCuentas() {
-        let { data, error } = await supabase.from("netflix").select("*");
-        if (error) {
-            alert("Error al obtener datos.");
-        } else {
-            alert(`Hay ${data.length} cuentas registradas.`);
-        }
-    }
-
-    // 🔹 Ver total de perfiles en uso
-    async function verTotalPerfiles() {
-        let { data, error } = await supabase.from("netflix").select("perfiles_disponibles");
-        if (error) {
-            alert("Error al obtener datos.");
-        } else {
-            let totalUsados = data.reduce((sum, cuenta) => sum + (5 - cuenta.perfiles_disponibles), 0);
-            alert(`Se han asignado ${totalUsados} perfiles en total.`);
-        }
-    }
-    </script>
-</body>
+    <header>
+        <h1>Sistema de Gestión de Cuentas</h1>
+        <nav>
+            <ul>
+                <li><a href="#dashboard">Dashboard</a></li>
+                <li><a href="#cuentas">Cuentas</a></li>
+                <li><a href="#clientes">Clientes</a></li>
+                <li><a href="#reportes">Reportes</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <!-- Dashboard -->
+    <section id="dashboard">
+        <h2>Dashboard</h2>
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Total Cuentas</h3>
+                <p id="totalCuentas">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Perfiles Disponibles</h3>
+                <p id="perfilesDisponibles">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Vencimientos Próximos</h3>
+                <p id="vencimientosProximos">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Ingresos Mensuales</h3>
+                <p id="ingresosMensuales">$0</p>
+            </div>
+        </div>
+        <div class="alertas">
+            <h3>Alertas</h3>
+            <ul id="listaAlertas"></ul>
+        </div>
+    </section>
+    
+    <!-- Gestión de Cuentas -->
+    <section id="cuentas">
+        <h2>Gestión de Cuentas</h2>
+        
+        <!-- Registro de Cuenta -->
+        <div class="card">
+            <h3>Registrar Cuenta</h3>
+            <form id="registroCuenta">
+                <div class="form-group">
+                    <label for="servicio">Servicio:</label>
+                    <select id="servicio" required>
+                        <option value="">Seleccionar servicio</option>
+                        <option value="netflix">Netflix</option>
+                        <option value="disney">Disney+</option>
+                        <option value="hbo">HBO Max</option>
+                        <option value="amazon">Prime Video</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="plan">Plan:</label>
+                    <select id="plan" required>
+                        <option value="">Seleccionar plan</option>
+                        <option value="basico">Básico</option>
+                        <option value="estandar">Estándar</option>
+                        <option value="premium">Premium</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="correo">Correo:</label>
+                    <input type="email" id="correo" required>
+                </div>
+                <div class="form-group">
+                    <label for="contraseña">Contraseña:</label>
+                    <input type="password" id="contraseña" required>
+                    <button type="button" id="generarContraseña">Generar</button>
+                </div>
+                <div class="form-group">
+                    <label for="perfiles">Cantidad de Perfiles:</label>
+                    <input type="number" id="perfiles" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="costo">Costo de la cuenta:</label>
+                    <input type="number" id="costo" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="precioPerfil">Precio por perfil:</label>
+                    <input type="number" id="precioPerfil" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_compra">Fecha de compra:</label>
+                    <input type="date" id="fecha_compra" required>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_vencimiento">Fecha de vencimiento:</label>
+                    <input type="date" id="fecha_vencimiento" required>
+                </div>
+                <div class="form-group">
+                    <label for="notas">Notas adicionales:</label>
+                    <textarea id="notas"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Registrar Cuenta</button>
+            </form>
+        </div>
+        
+        <!-- Lista de Cuentas -->
+        <div class="card">
+            <h3>Cuentas Registradas</h3>
+            <div class="search-box">
+                <input type="text" id="buscarCuenta" placeholder="Buscar cuenta...">
+                <select id="filtroServicio">
+                    <option value="">Todos los servicios</option>
+                    <option value="netflix">Netflix</option>
+                    <option value="disney">Disney+</option>
+                    <option value="hbo">HBO Max</option>
+                    <option value="amazon">Prime Video</option>
+                </select>
+                <select id="filtroEstado">
+                    <option value="">Todos los estados</option>
+                    <option value="activa">Activa</option>
+                    <option value="vencida">Vencida</option>
+                    <option value="proxima">Próxima a vencer</option>
+                </select>
+            </div>
+            <table id="tablaCuentas">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Correo</th>
+                        <th>Perfiles Total</th>
+                        <th>Perfiles Usados</th>
+                        <th>Fecha Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="listaCuentas"></tbody>
+            </table>
+            <div id="paginacionCuentas" class="paginacion"></div>
+        </div>
+    </section>
+    
+    <!-- Asignación de Perfiles -->
+    <section id="asignacion">
+        <h2>Asignación de Perfiles</h2>
+        <div class="card">
+            <h3>Asignar Perfil</h3>
+            <form id="asignarPerfil">
+                <div class="form-group">
+                    <label for="servicioAsignar">Servicio:</label>
+                    <select id="servicioAsignar" required>
+                        <option value="">Seleccionar servicio</option>
+                        <option value="netflix">Netflix</option>
+                        <option value="disney">Disney+</option>
+                        <option value="hbo">HBO Max</option>
+                        <option value="amazon">Prime Video</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cuentasDisponibles">Cuenta:</label>
+                    <select id="cuentasDisponibles" required></select>
+                    <span id="perfilesRestantes" class="badge"></span>
+                </div>
+                <div class="form-group">
+                    <label for="nombreCliente">Nombre del Cliente:</label>
+                    <input type="text" id="nombreCliente" required>
+                </div>
+                <div class="form-group">
+                    <label for="whatsapp">WhatsApp del Cliente:</label>
+                    <input type="tel" id="whatsapp" required>
+                </div>
+                <div class="form-group">
+                    <label for="emailCliente">Email del Cliente:</label>
+                    <input type="email" id="emailCliente">
+                </div>
+                <div class="form-group">
+                    <label for="nombrePerfil">Nombre del Perfil:</label>
+                    <input type="text" id="nombrePerfil">
+                </div>
+                <div class="form-group">
+                    <label for="pinPerfil">PIN (si aplica):</label>
+                    <input type="text" id="pinPerfil">
+                </div>
+                <div class="form-group">
+                    <label for="fechaAsignacion">Fecha de Asignación:</label>
+                    <input type="date" id="fechaAsignacion" required>
+                </div>
+                <div class="form-group">
+                    <label for="duracionMeses">Duración (meses):</label>
+                    <input type="number" id="duracionMeses" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="precioAsignado">Precio Cobrado:</label>
+                    <input type="number" id="precioAsignado" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="metodoPago">Método de Pago:</label>
+                    <select id="metodoPago" required>
+                        <option value="">Seleccionar método</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="mercadopago">MercadoPago</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <p id="advertencia" class="alerta" style="display: none;">⚠️ No hay perfiles disponibles en esta cuenta.</p>
+                <button type="submit" class="btn-primary">Asignar Perfil</button>
+            </form>
+        </div>
+    </section>
+    
+    <!-- Gestión de Clientes -->
+    <section id="clientes">
+        <h2>Gestión de Clientes</h2>
+        <div class="search-box">
+            <input type="text" id="buscarCliente" placeholder="Buscar cliente...">
+            <select id="filtroServicioCliente">
+                <option value="">Todos los servicios</option>
+                <option value="netflix">Netflix</option>
+                <option value="disney">Disney+</option>
+                <option value="hbo">HBO Max</option>
+                <option value="amazon">Prime Video</option>
+            </select>
+            <select id="filtroEstadoCliente">
+                <option value="">Todos los estados</option>
+                <option value="activo">Activo</option>
+                <option value="vencido">Vencido</option>
+                <option value="pendiente">Pendiente renovación</option>
+            </select>
+        </div>
+        <table id="tablaClientes">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>WhatsApp</th>
+                    <th>Email</th>
+                    <th>Servicio</th>
+                    <th>Fecha Asignación</th>
+                    <th>Fecha Vencimiento</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="listaClientes"></tbody>
+        </table>
+        <div id="paginacionClientes" class="paginacion"></div>
+    </section>
+    
+    <!-- Reemplazo de Cuentas -->
+    <section id="reemplazo">
+        <h2>Reemplazo de Cuentas</h2>
+        <div class="card">
+            <h3>Cuentas Caídas</h3>
+            <table id="tablaCuentasCaidas">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Correo</th>
+                        <th>Clientes Afectados</th>
+                        <th>Fecha Reporte</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="listaCuentasCaidas"></tbody>
+            </table>
+        </div>
+        
+        <div class="card">
+            <h3>Reemplazar Cuenta</h3>
+            <form id="reemplazoCuenta">
+                <div class="form-group">
+                    <label for="cuentaCaida">Cuenta a reemplazar:</label>
+                    <select id="cuentaCaida" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="servicio">Servicio:</label>
+                    <select id="servicioReemplazo" required>
+                        <option value="">Seleccionar servicio</option>
+                        <option value="netflix">Netflix</option>
+                        <option value="disney">Disney+</option>
+                        <option value="hbo">HBO Max</option>
+                        <option value="amazon">Prime Video</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nuevoCorreo">Nuevo Correo:</label>
+                    <input type="email" id="nuevoCorreo" required>
+                </div>
+                <div class="form-group">
+                    <label for="nuevaContraseña">Nueva Contraseña:</label>
+                    <input type="password" id="nuevaContraseña" required>
+                </div>
+                <div class="form-group">
+                    <label for="nuevosPerfiles">Cantidad de Perfiles:</label>
+                    <input type="number" id="nuevosPerfiles" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="nuevaFechaVencimiento">Nueva Fecha Vencimiento:</label>
+                    <input type="date" id="nuevaFechaVencimiento" required>
+                </div>
+                <div class="form-group">
+                    <label for="notificarClientes">Notificar a clientes:</label>
+                    <input type="checkbox" id="notificarClientes" checked>
+                </div>
+                <button type="submit" class="btn-primary">Reemplazar Cuenta</button>
+            </form>
+        </div>
+    </section>
+    
+   <!-- Notificaciones -->
+<section id="notificaciones">
+    <h2>Notificaciones</h2>
+    <div class="card">
+        <h3>Enviar Notificaciones</h3>
+        <div class="form-group">
+            <label for="tipoNotificacion">Tipo de notificación:</label>
+            <select id="tipoNotificacion">
+                <option value="renovacion">Renovación de cuenta</option>
+                <option value="reemplazo">Reemplazo de cuenta</option>
+                <option value="informativa">Información general</option>
+                <option value="promocion">Promoción</option>
+            </select>
+        </div>
+    </div>
+</section>
+    </body>
 </html>
