@@ -1,32 +1,75 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Cuentas Streaming</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f4f4f4; }
         .actions button { margin-right: 5px; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        button { padding: 8px 16px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        .delete-btn { background-color: #f44336; }
+        .delete-btn:hover { background-color: #d32f2f; }
+        .status-pending { color: orange; }
+        .status-paid { color: green; }
+        #notification { 
+            padding: 15px; 
+            margin-bottom: 20px; 
+            display: none; 
+            background-color: #d4edda; 
+            color: #155724; 
+            border-radius: 4px; 
+        }
     </style>
 </head>
 <body>
 
     <h2>Gestión de Cuentas Streaming</h2>
+    
+    <div id="notification"></div>
 
-    <h3>Agregar Cuenta</h3>
-    <input type="email" id="correo" placeholder="Correo">
-    <input type="text" id="contraseña" placeholder="Contraseña">
-    <input type="text" id="plataforma" placeholder="Plataforma">
-    <input type="number" id="perfiles" placeholder="Perfiles">
-    <input type="date" id="fecha_vencimiento">
-    <input type="text" id="estado_pago" placeholder="Estado de pago">
-    <input type="text" id="whatsapp_cliente" placeholder="WhatsApp Cliente">
-    <button onclick="agregarCuenta()">Agregar</button>
+    <div class="form-group">
+        <h3>Agregar Cuenta</h3>
+        <div class="form-group">
+            <label for="correo">Correo:</label>
+            <input type="email" id="correo" placeholder="Correo">
+        </div>
+        <div class="form-group">
+            <label for="contraseña">Contraseña:</label>
+            <input type="text" id="contraseña" placeholder="Contraseña">
+        </div>
+        <div class="form-group">
+            <label for="plataforma">Plataforma:</label>
+            <input type="text" id="plataforma" placeholder="Netflix, Disney+, etc.">
+        </div>
+        <div class="form-group">
+            <label for="perfiles">Perfiles disponibles:</label>
+            <input type="number" id="perfiles" placeholder="Número de perfiles" min="1">
+        </div>
+        <div class="form-group">
+            <label for="fecha_vencimiento">Fecha de vencimiento:</label>
+            <input type="date" id="fecha_vencimiento">
+        </div>
+        <div class="form-group">
+            <label for="estado_pago">Estado de pago:</label>
+            <select id="estado_pago">
+                <option value="pendiente">Pendiente</option>
+                <option value="pagado">Pagado</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="whatsapp_cliente">WhatsApp Cliente:</label>
+            <input type="text" id="whatsapp_cliente" placeholder="Número de WhatsApp">
+        </div>
+        <button onclick="agregarCuenta()">Agregar Cuenta</button>
+    </div>
 
     <h3>Lista de Cuentas</h3>
     <table>
@@ -47,85 +90,165 @@
     </table>
 
     <script>
-        const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
+        // Configura tus credenciales de Supabase aquí
+        const SUPABASE_URL = "https://tu-proyecto.supabase.co";
+        const SUPABASE_ANON_KEY = "tu-clave-anonima";
 
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Inicializa el cliente Supabase correctamente
+        const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Función para mostrar notificaciones
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById("notification");
+            notification.textContent = message;
+            notification.style.display = "block";
+            notification.style.backgroundColor = isError ? "#f8d7da" : "#d4edda";
+            notification.style.color = isError ? "#721c24" : "#155724";
+            
+            setTimeout(() => {
+                notification.style.display = "none";
+            }, 3000);
+        }
 
         async function cargarCuentas() {
-            const { data, error } = await supabase.from("netflix").select("*");
-            if (error) {
-                console.error("Error al cargar cuentas:", error);
-                return;
-            }
+            try {
+                const { data, error } = await supabase.from("netflix").select("*");
+                
+                if (error) {
+                    throw error;
+                }
 
-            const tbody = document.getElementById("cuentas-list");
-            tbody.innerHTML = "";
-            data.forEach(cuenta => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${cuenta.id}</td>
-                    <td>${cuenta.correo}</td>
-                    <td>${cuenta.contraseña || "N/A"}</td>
-                    <td>${cuenta.plataforma || "N/A"}</td>
-                    <td>${cuenta.perfiles || "N/A"}</td>
-                    <td>${cuenta.fecha_vencimiento ? new Date(cuenta.fecha_vencimiento).toLocaleDateString() : "N/A"}</td>
-                    <td>${cuenta.estado_pago}</td>
-                    <td>${cuenta.whatsapp_cliente || "N/A"}</td>
-                    <td class="actions">
-                        <button onclick="eliminarCuenta(${cuenta.id})">Eliminar</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
+                const tbody = document.getElementById("cuentas-list");
+                tbody.innerHTML = "";
+                
+                if (data && data.length > 0) {
+                    data.forEach(cuenta => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${cuenta.id}</td>
+                            <td>${cuenta.correo}</td>
+                            <td>${cuenta.contraseña || "N/A"}</td>
+                            <td>${cuenta.plataforma || "N/A"}</td>
+                            <td>${cuenta.perfiles || "N/A"}</td>
+                            <td>${cuenta.fecha_vencimiento ? new Date(cuenta.fecha_vencimiento).toLocaleDateString() : "N/A"}</td>
+                            <td class="${cuenta.estado_pago === 'pagado' ? 'status-paid' : 'status-pending'}">${cuenta.estado_pago}</td>
+                            <td>${cuenta.whatsapp_cliente || "N/A"}</td>
+                            <td class="actions">
+                                <button class="delete-btn" onclick="eliminarCuenta(${cuenta.id})">Eliminar</button>
+                                <button onclick="editarCuenta(${cuenta.id})">Editar</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    const row = document.createElement("tr");
+                    row.innerHTML = '<td colspan="9" style="text-align: center;">No hay cuentas registradas</td>';
+                    tbody.appendChild(row);
+                }
+            } catch (error) {
+                console.error("Error al cargar cuentas:", error);
+                showNotification("Error al cargar las cuentas: " + error.message, true);
+            }
         }
 
         async function agregarCuenta() {
-            const correo = document.getElementById("correo").value;
-            const contraseña = document.getElementById("contraseña").value;
-            const plataforma = document.getElementById("plataforma").value;
-            const perfiles = document.getElementById("perfiles").value;
-            const fecha_vencimiento = document.getElementById("fecha_vencimiento").value;
-            const estado_pago = document.getElementById("estado_pago").value || "pendiente";
-            const whatsapp_cliente = document.getElementById("whatsapp_cliente").value;
+            try {
+                const correo = document.getElementById("correo").value;
+                const contraseña = document.getElementById("contraseña").value;
+                const plataforma = document.getElementById("plataforma").value;
+                const perfiles = document.getElementById("perfiles").value;
+                const fecha_vencimiento = document.getElementById("fecha_vencimiento").value;
+                const estado_pago = document.getElementById("estado_pago").value;
+                const whatsapp_cliente = document.getElementById("whatsapp_cliente").value;
 
-            if (!correo || !plataforma || !perfiles || !fecha_vencimiento) {
-                alert("Los campos de correo, plataforma, perfiles y vencimiento son obligatorios.");
-                return;
-            }
+                if (!correo || !plataforma || !perfiles || !fecha_vencimiento) {
+                    showNotification("Los campos de correo, plataforma, perfiles y vencimiento son obligatorios.", true);
+                    return;
+                }
 
-            const { data, error } = await supabase.from("netflix").insert([
-                { correo, contraseña, plataforma, perfiles, fecha_vencimiento, estado_pago, whatsapp_cliente }
-            ]);
+                const { data, error } = await supabase.from("netflix").insert([
+                    { 
+                        correo, 
+                        contraseña, 
+                        plataforma, 
+                        perfiles: parseInt(perfiles), 
+                        fecha_vencimiento, 
+                        estado_pago, 
+                        whatsapp_cliente 
+                    }
+                ]).select();
 
-            if (error) {
+                if (error) {
+                    throw error;
+                }
+
+                showNotification("Cuenta agregada correctamente");
+                limpiarFormulario();
+                cargarCuentas();
+            } catch (error) {
                 console.error("Error al agregar cuenta:", error);
-                return;
+                showNotification("Error al agregar la cuenta: " + error.message, true);
             }
+        }
 
-            cargarCuentas();
+        async function eliminarCuenta(id) {
+            try {
+                if (!confirm("¿Estás seguro de que deseas eliminar esta cuenta?")) {
+                    return;
+                }
+                
+                const { error } = await supabase.from("netflix").delete().eq("id", id);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                showNotification("Cuenta eliminada correctamente");
+                cargarCuentas();
+            } catch (error) {
+                console.error("Error al eliminar cuenta:", error);
+                showNotification("Error al eliminar la cuenta: " + error.message, true);
+            }
+        }
+
+        function editarCuenta(id) {
+            // En una implementación completa, aquí podrías cargar los datos de la cuenta
+            // en un formulario de edición o abrir un modal para editar
+            alert("Funcionalidad de edición será implementada próximamente");
+        }
+
+        function limpiarFormulario() {
             document.getElementById("correo").value = "";
             document.getElementById("contraseña").value = "";
             document.getElementById("plataforma").value = "";
             document.getElementById("perfiles").value = "";
             document.getElementById("fecha_vencimiento").value = "";
-            document.getElementById("estado_pago").value = "";
+            document.getElementById("estado_pago").value = "pendiente";
             document.getElementById("whatsapp_cliente").value = "";
         }
 
-        async function eliminarCuenta(id) {
-            const { error } = await supabase.from("netflix").delete().eq("id", id);
-            if (error) {
-                console.error("Error al eliminar cuenta:", error);
-                return;
+        // Verificar la conexión con Supabase al cargar la página
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                // Intenta hacer una consulta simple para verificar la conexión
+                const { error } = await supabase.from("netflix").select("id").limit(1);
+                
+                if (error && error.code === "PGRST116") {
+                    // PGRST116 significa que la tabla no existe, lo cual está bien
+                    showNotification("Conectado a Supabase pero la tabla 'netflix' no existe. Créala primero.");
+                } else if (error) {
+                    throw error;
+                } else {
+                    showNotification("Conexión con Supabase establecida correctamente");
+                    cargarCuentas();
+                }
+            } catch (error) {
+                console.error("Error de conexión con Supabase:", error);
+                showNotification("Error de conexión con Supabase. Verifica tus credenciales en el código.", true);
             }
-            cargarCuentas();
-        }
-
-        document.addEventListener("DOMContentLoaded", cargarCuentas);
+        });
     </script>
 
 </body>
 </html>
-
        
