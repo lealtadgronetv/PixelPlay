@@ -48,11 +48,11 @@
     
     <h2>Asignar Perfil a Cliente</h2>
     <form id="assignProfileForm">
-        <label for="correo_cliente">Correo Cliente:</label>
-        <input type="email" id="correo_cliente" required>
+        <label for="nombre_cliente">Nombre Cliente:</label>
+        <input type="text" id="nombre_cliente" required>
         
-        <label for="whatsapp_cliente">WhatsApp Cliente:</label>
-        <input type="text" id="whatsapp_cliente" required>
+        <label for="nombre_perfil">Nombre del Perfil:</label>
+        <input type="text" id="nombre_perfil" required>
         
         <label for="cuenta">Seleccionar Cuenta:</label>
         <select id="cuenta" required></select>
@@ -130,13 +130,13 @@
         async function assignProfile(event) {
             event.preventDefault();
             const cuentaId = document.getElementById('cuenta').value;
-            const correo_cliente = document.getElementById('correo_cliente').value;
-            const whatsapp_cliente = document.getElementById('whatsapp_cliente').value;
+            const nombre_cliente = document.getElementById('nombre_cliente').value;
+            const nombre_perfil = document.getElementById('nombre_perfil').value;
             
             const { data: account } = await supabase.from('netflix').select('perfiles').eq('id', cuentaId).single();
             if (account.perfiles > 0) {
                 await supabase.from('netflix').update({ perfiles: account.perfiles - 1 }).eq('id', cuentaId);
-                await supabase.from('clientes').insert([{ cuenta_id: cuentaId, correo_cliente, whatsapp_cliente }]);
+                await supabase.from('clientes').insert([{ cuenta_id: cuentaId, nombre_cliente, nombre_perfil }]);
             }
             fetchAccounts();
         }
