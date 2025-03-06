@@ -6,16 +6,17 @@
     <title>Prueba Supabase</title>
 </head>
 <body>
-    <h2>Agregar Cuenta</h2>
-    <form id="form-cuenta">
+
+    <h2>Prueba de conexión a Supabase</h2>
+    <form id="form-prueba">
         <input type="email" id="correo" placeholder="Correo" required>
         <input type="password" id="contraseña" placeholder="Contraseña" required>
         <input type="text" id="plataforma" placeholder="Plataforma" required>
         <input type="number" id="perfiles" placeholder="Perfiles" required>
-        <button type="submit">Guardar</button>
+        <button type="submit">Agregar Cuenta</button>
     </form>
 
-    <p id="mensaje"></p>
+    <p id="resultado"></p>
 
     <script type="module">
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
@@ -24,23 +25,27 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        document.getElementById("form-cuenta").addEventListener("submit", async function (event) {
+        document.getElementById("form-prueba").addEventListener("submit", async function (event) {
             event.preventDefault();
             const correo = document.getElementById("correo").value;
             const contraseña = document.getElementById("contraseña").value;
             const plataforma = document.getElementById("plataforma").value;
             const perfiles = parseInt(document.getElementById("perfiles").value);
 
-            const { data, error } = await supabase.from("cuentas").insert([{ correo, contraseña, plataforma, perfiles }]);
+            const { data, error } = await supabase.from("netflix").insert([
+                { correo, contraseña, plataforma, perfiles }
+            ]);
 
             if (error) {
-                document.getElementById("mensaje").innerText = "❌ Error: " + error.message;
+                console.error("Error al guardar:", error);
+                document.getElementById("resultado").innerText = "❌ Error: " + JSON.stringify(error);
             } else {
-                document.getElementById("mensaje").innerText = "✅ Cuenta guardada correctamente";
-                document.getElementById("form-cuenta").reset();
+                document.getElementById("resultado").innerText = "✅ Cuenta agregada correctamente";
             }
         });
     </script>
+
 </body>
 </html>
+
 
