@@ -37,26 +37,28 @@
         <label for="plataforma">Plataforma:</label>
         <input type="text" id="plataforma" required>
         
-        <label for="perfiles">Perfiles:</label>
+        <label for="perfiles">Perfiles Disponibles:</label>
         <input type="number" id="perfiles" required>
         
         <label for="fecha_vencimiento">Fecha de Vencimiento:</label>
         <input type="date" id="fecha_vencimiento" required>
         
-        <label for="estado_pago">Estado de Pago:</label>
-        <select id="estado_pago">
-            <option value="pendiente">Pendiente</option>
-            <option value="pagado">Pagado</option>
-        </select>
-        
-        <label for="whatsapp_cliente">WhatsApp Cliente:</label>
-        <input type="text" id="whatsapp_cliente">
-        
         <button type="submit">Agregar Cuenta</button>
     </form>
     
-    <h2>Filtrar Cuentas</h2>
-    <input type="text" id="filterInput" placeholder="Filtrar por correo...">
+    <h2>Asignar Perfil a Cliente</h2>
+    <form id="assignProfileForm">
+        <label for="correo_cliente">Correo Cliente:</label>
+        <input type="email" id="correo_cliente" required>
+        
+        <label for="whatsapp_cliente">WhatsApp Cliente:</label>
+        <input type="text" id="whatsapp_cliente" required>
+        
+        <label for="cuenta">Seleccionar Cuenta:</label>
+        <select id="cuenta" required></select>
+        
+        <button type="submit">Asignar Perfil</button>
+    </form>
     
     <h2>Lista de Cuentas</h2>
     <table>
@@ -65,10 +67,8 @@
                 <th>ID</th>
                 <th>Correo</th>
                 <th>Plataforma</th>
-                <th>Perfiles</th>
+                <th>Perfiles Disponibles</th>
                 <th>Fecha Vencimiento</th>
-                <th>Estado de Pago</th>
-                <th>WhatsApp Cliente</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -90,16 +90,19 @@
 
         function renderAccounts(accounts) {
             const tableBody = document.getElementById('accountList');
+            const selectAccount = document.getElementById('cuenta');
             tableBody.innerHTML = '';
+            selectAccount.innerHTML = '';
             accounts.forEach(account => {
+                if (account.perfiles > 0) {
+                    selectAccount.innerHTML += `<option value="${account.id}">${account.correo} - ${account.perfiles} perfiles</option>`;
+                }
                 const row = `<tr>
                     <td>${account.id}</td>
                     <td>${account.correo}</td>
                     <td>${account.plataforma}</td>
                     <td>${account.perfiles}</td>
                     <td>${account.fecha_vencimiento}</td>
-                    <td>${account.estado_pago}</td>
-                    <td>${account.whatsapp_cliente || ''}</td>
                     <td><button onclick="deleteAccount(${account.id})">Eliminar</button></td>
                 </tr>`;
                 tableBody.innerHTML += row;
@@ -113,18 +116,28 @@
             const plataforma = document.getElementById('plataforma').value;
             const perfiles = document.getElementById('perfiles').value;
             const fecha_vencimiento = document.getElementById('fecha_vencimiento').value;
-            const estado_pago = document.getElementById('estado_pago').value;
-            const whatsapp_cliente = document.getElementById('whatsapp_cliente').value;
             
             await supabase.from('netflix').insert([{ 
                 correo, 
                 contraseña, 
                 plataforma, 
                 perfiles, 
-                fecha_vencimiento, 
-                estado_pago, 
-                whatsapp_cliente
+                fecha_vencimiento
             }]);
+            fetchAccounts();
+        }
+
+        async function assignProfile(event) {
+            event.preventDefault();
+            const cuentaId = document.getElementById('cuenta').value;
+            const correo_cliente = document.getElementById('correo_cliente').value;
+            const whatsapp_cliente = document.getElementById('whatsapp_cliente').value;
+            
+            const { data: account } = await supabase.from('netflix').select('perfiles').eq('id', cuentaId).single();
+            if (account.perfiles > 0) {
+                await supabase.from('netflix').update({ perfiles: account.perfiles - 1 }).eq('id', cuentaId);
+                await supabase.from('clientes').insert([{ cuenta_id: cuentaId, correo_cliente, whatsapp_cliente }]);
+            }
             fetchAccounts();
         }
 
@@ -134,13 +147,7 @@
         }
 
         document.getElementById('addAccountForm').addEventListener('submit', addAccount);
-        document.getElementById('filterInput').addEventListener('input', (event) => {
-            const filter = event.target.value.toLowerCase();
-            document.querySelectorAll('#accountList tr').forEach(row => {
-                row.style.display = row.cells[1].textContent.toLowerCase().includes(filter) ? '' : 'none';
-            });
-        });
-
+        document.getElementById('assignProfileForm').addEventListener('submit', assignProfile);
         document.addEventListener('DOMContentLoaded', fetchAccounts);
     </script>
 </body>
