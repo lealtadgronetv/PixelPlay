@@ -3,361 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión de Cuentas y Perfiles</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Gestión de Cuentas Streaming</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .actions button { margin-right: 5px; }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>Sistema de Gestión de Cuentas y Perfiles</h1>
-        </div>
-    </header>
-    
-    <nav>
-        <div class="container">
-            <ul>
-                <li class="nav-item active" data-section="cuentas">Cuentas</li>
-                <li class="nav-item" data-section="clientes">Clientes</li>
-                <li class="nav-item" data-section="asignaciones">Asignaciones</li>
-                <li class="nav-item" data-section="ventas">Ventas</li>
-                <li class="nav-item" data-section="notificaciones">Notificaciones</li>
-            </ul>
-        </div>
-    </nav>
-    
-    <div class="container">
-        <!-- Sección de Cuentas -->
-        <section id="cuentas" class="section active">
-            <div class="card">
-                <h2>Agregar Nueva Cuenta</h2>
-                <form id="cuenta-form">
-                    <div class="form-group">
-                        <label for="cuenta-email">Correo</label>
-                        <input type="email" id="cuenta-email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cuenta-password">Contraseña</label>
-                        <input type="password" id="cuenta-password" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cuenta-plataforma">Plataforma</label>
-                        <select id="cuenta-plataforma" required>
-                            <option value="">Seleccione una plataforma</option>
-                            <option value="Netflix">Netflix</option>
-                            <option value="Disney+">Disney+</option>
-                            <option value="HBO Max">HBO Max</option>
-                            <option value="Amazon Prime">Amazon Prime</option>
-                            <option value="Spotify">Spotify</option>
-                            <option value="YouTube Premium">YouTube Premium</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="cuenta-perfiles">Número de Perfiles</label>
-                        <input type="number" id="cuenta-perfiles" min="1" max="10" value="4" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cuenta-vencimiento">Fecha de Vencimiento</label>
-                        <input type="date" id="cuenta-vencimiento" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Agregar Cuenta</button>
-                </form>
-            </div>
-            
-            <div class="card">
-                <h2>Cuentas Disponibles</h2>
-                <div class="tabla-container">
-                    <table id="cuentas-table">
-                        <thead>
-                            <tr>
-                                <th>Plataforma</th>
-                                <th>Correo</th>
-                                <th>Perfiles Total</th>
-                                <th>Perfiles Usados</th>
-                                <th>Vencimiento</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Datos dinámicos -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Sección de Clientes -->
-        <section id="clientes" class="section">
-            <div class="card">
-                <h2>Registrar Nuevo Cliente</h2>
-                <form id="cliente-form">
-                    <div class="form-group">
-                        <label for="cliente-nombre">Nombre</label>
-                        <input type="text" id="cliente-nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cliente-telefono">Teléfono (WhatsApp)</label>
-                        <input type="tel" id="cliente-telefono" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cliente-email">Correo (opcional)</label>
-                        <input type="email" id="cliente-email">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Registrar Cliente</button>
-                </form>
-            </div>
-            
-            <div class="card">
-                <h2>Lista de Clientes</h2>
-                <div class="tabla-container">
-                    <table id="clientes-table">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Teléfono</th>
-                                <th>Correo</th>
-                                <th>Perfiles Asignados</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Datos dinámicos -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Sección de Asignaciones -->
-        <section id="asignaciones" class="section">
-            <div class="card">
-                <h2>Asignar Perfil</h2>
-                <form id="asignacion-form">
-                    <div class="form-group">
-                        <label for="asignacion-cliente">Cliente</label>
-                        <select id="asignacion-cliente" required>
-                            <option value="">Seleccione un cliente</option>
-                            <!-- Opciones dinámicas -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="asignacion-plataforma">Plataforma</label>
-                        <select id="asignacion-plataforma" required>
-                            <option value="">Seleccione una plataforma</option>
-                            <option value="Netflix">Netflix</option>
-                            <option value="Disney+">Disney+</option>
-                            <option value="HBO Max">HBO Max</option>
-                            <option value="Amazon Prime">Amazon Prime</option>
-                            <option value="Spotify">Spotify</option>
-                            <option value="YouTube Premium">YouTube Premium</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="asignacion-cuenta">Cuenta Disponible</label>
-                        <select id="asignacion-cuenta" required>
-                            <option value="">Seleccione una cuenta</option>
-                            <!-- Opciones dinámicas -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="asignacion-perfil">Nombre de Perfil</label>
-                        <input type="text" id="asignacion-perfil" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="asignacion-dias">Días Adicionales (opcional)</label>
-                        <input type="number" id="asignacion-dias" min="0" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="asignacion-notificar" checked>
-                            Notificar al cliente por WhatsApp
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Asignar Perfil</button>
-                </form>
-            </div>
-            
-            <div class="card">
-                <h2>Mover Perfil</h2>
-                <form id="mover-form">
-                    <div class="form-group">
-                        <label for="mover-cliente">Cliente</label>
-                        <select id="mover-cliente" required>
-                            <option value="">Seleccione un cliente</option>
-                            <!-- Opciones dinámicas -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="mover-perfil">Perfil a Mover</label>
-                        <select id="mover-perfil" required>
-                            <option value="">Seleccione un perfil</option>
-                            <!-- Opciones dinámicas -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="mover-cuenta-destino">Cuenta Destino</label>
-                        <select id="mover-cuenta-destino" required>
-                            <option value="">Seleccione una cuenta</option>
-                            <!-- Opciones dinámicas -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="mover-notificar" checked>
-                            Notificar al cliente por WhatsApp
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn-secondary">Mover Perfil</button>
-                </form>
-            </div>
-            
-            <div class="card">
-                <h2>Perfiles Asignados</h2>
-                <div class="tabla-container">
-                    <table id="perfiles-table">
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Plataforma</th>
-                                <th>Cuenta</th>
-                                <th>Perfil</th>
-                                <th>Fecha Vencimiento</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Datos dinámicos -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Sección de Ventas -->
-        <section id="ventas" class="section">
-            <div class="card">
-                <h2>Cuentas con Espacio Disponible</h2>
-                <div class="tabla-container">
-                    <table id="cuentas-disponibles-table">
-                        <thead>
-                            <tr>
-                                <th>Plataforma</th>
-                                <th>Perfiles Disponibles</th>
-                                <th>Vencimiento</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Datos dinámicos -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h2>Clientes con Reasignaciones</h2>
-                <div class="tabla-container">
-                    <table id="clientes-reasignados-table">
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Perfil</th>
-                                <th>Plataforma</th>
-                                <th>Cuenta Original</th>
-                                <th>Cuenta Nueva</th>
-                                <th>Fecha Reasignación</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Datos dinámicos -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h2>Vencimientos Próximos</h2>
-                <div class="tabla-container">
-                    <table id="vencimientos-table">
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Plataforma</th>
-                                <th>Perfil</th>
-                                <th>Vencimiento</th>
-                                <th>Días Restantes</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Datos dinámicos -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Sección de Notificaciones -->
-        <section id="notificaciones" class="section">
-            <div class="card">
-                <h2>Configurar Mensajes Automáticos</h2>
-                <form id="mensajes-form">
-                    <div class="form-group">
-                        <label for="mensaje-asignacion">Mensaje de Asignación</label>
-                        <textarea id="mensaje-asignacion" rows="4" class="form-control">Hola {cliente}, te has suscrito a {plataforma}. Accede con: Email: {email} / Contraseña: {password} / Tu perfil: {perfil}. Vence el {vencimiento}.</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="mensaje-reemplazo">Mensaje de Reemplazo de Cuenta</label>
-                        <textarea id="mensaje-reemplazo" rows="4" class="form-control">Hola {cliente}, tu cuenta de {plataforma} ha sido reemplazada. Accede con: Email: {email} / Contraseña: {password} / Tu perfil: {perfil}.</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="mensaje-vencimiento">Mensaje de Vencimiento Próximo</label>
-                        <textarea id="mensaje-vencimiento" rows="4" class="form-control">Hola {cliente}, tu suscripción de {plataforma} vence en {dias} días. Contacta para renovar.</textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Guardar Configuración</button>
-                </form>
-            </div>
-            
-            <div class="card">
-                <h2>Historial de Notificaciones</h2>
-                <div class="tabla-container">
-                    <table id="notificaciones-table">
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Tipo</th>
-                                <th>Mensaje</th>
-                                <th>Fecha</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Datos dinámicos -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h2>Enviar Notificación Manual</h2>
-                <form id="notificacion-manual-form">
-                    <div class="form-group">
-                        <label for="notificacion-cliente">Cliente</label>
-                        <select id="notificacion-cliente" required>
-                            <option value="">Seleccione un cliente</option>
-                            <!-- Opciones dinámicas -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="notificacion-mensaje">Mensaje</label>
-                        <textarea id="notificacion-mensaje" rows="4" class="form-control" required></textarea>
-                    </div>
-                                        <button type="submit" class="btn btn-primary">Enviar</button>
-                </form>
-            </div>
-        </div>
-    </div>
+
+    <h2>Gestión de Cuentas Streaming</h2>
+
+    <h3>Agregar Cuenta</h3>
+    <input type="email" id="correo" placeholder="Correo">
+    <input type="text" id="contraseña" placeholder="Contraseña">
+    <input type="text" id="plataforma" placeholder="Plataforma">
+    <input type="number" id="perfiles" placeholder="Perfiles">
+    <input type="date" id="fecha_vencimiento">
+    <input type="text" id="estado_pago" placeholder="Estado de pago">
+    <input type="text" id="whatsapp_cliente" placeholder="WhatsApp Cliente">
+    <button onclick="agregarCuenta()">Agregar</button>
+
+    <h3>Lista de Cuentas</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Correo</th>
+                <th>Contraseña</th>
+                <th>Plataforma</th>
+                <th>Perfiles</th>
+                <th>Vencimiento</th>
+                <th>Pago</th>
+                <th>WhatsApp</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="cuentas-list"></tbody>
+    </table>
+
+    <script>
+        const SUPABASE_URL = "TU_SUPABASE_URL";
+        const SUPABASE_ANON_KEY = "TU_SUPABASE_ANON_KEY";
+
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function cargarCuentas() {
+            const { data, error } = await supabase.from("netflix").select("*");
+            if (error) {
+                console.error("Error al cargar cuentas:", error);
+                return;
+            }
+
+            const tbody = document.getElementById("cuentas-list");
+            tbody.innerHTML = "";
+            data.forEach(cuenta => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${cuenta.id}</td>
+                    <td>${cuenta.correo}</td>
+                    <td>${cuenta.contraseña || "N/A"}</td>
+                    <td>${cuenta.plataforma || "N/A"}</td>
+                    <td>${cuenta.perfiles || "N/A"}</td>
+                    <td>${cuenta.fecha_vencimiento ? new Date(cuenta.fecha_vencimiento).toLocaleDateString() : "N/A"}</td>
+                    <td>${cuenta.estado_pago}</td>
+                    <td>${cuenta.whatsapp_cliente || "N/A"}</td>
+                    <td class="actions">
+                        <button onclick="eliminarCuenta(${cuenta.id})">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function agregarCuenta() {
+            const correo = document.getElementById("correo").value;
+            const contraseña = document.getElementById("contraseña").value;
+            const plataforma = document.getElementById("plataforma").value;
+            const perfiles = document.getElementById("perfiles").value;
+            const fecha_vencimiento = document.getElementById("fecha_vencimiento").value;
+            const estado_pago = document.getElementById("estado_pago").value || "pendiente";
+            const whatsapp_cliente = document.getElementById("whatsapp_cliente").value;
+
+            if (!correo || !plataforma || !perfiles || !fecha_vencimiento) {
+                alert("Los campos de correo, plataforma, perfiles y vencimiento son obligatorios.");
+                return;
+            }
+
+            const { data, error } = await supabase.from("netflix").insert([
+                { correo, contraseña, plataforma, perfiles, fecha_vencimiento, estado_pago, whatsapp_cliente }
+            ]);
+
+            if (error) {
+                console.error("Error al agregar cuenta:", error);
+                return;
+            }
+
+            cargarCuentas();
+            document.getElementById("correo").value = "";
+            document.getElementById("contraseña").value = "";
+            document.getElementById("plataforma").value = "";
+            document.getElementById("perfiles").value = "";
+            document.getElementById("fecha_vencimiento").value = "";
+            document.getElementById("estado_pago").value = "";
+            document.getElementById("whatsapp_cliente").value = "";
+        }
+
+        async function eliminarCuenta(id) {
+            const { error } = await supabase.from("netflix").delete().eq("id", id);
+            if (error) {
+                console.error("Error al eliminar cuenta:", error);
+                return;
+            }
+            cargarCuentas();
+        }
+
+        document.addEventListener("DOMContentLoaded", cargarCuentas);
+    </script>
+
 </body>
 </html>
 
-        
        
