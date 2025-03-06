@@ -75,6 +75,20 @@
         <tbody id="accountList"></tbody>
     </table>
     
+    <h2>Lista de Perfiles Asignados</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre Cliente</th>
+                <th>Nombre del Perfil</th>
+                <th>Cuenta Asociada</th>
+                <th>Fecha Vencimiento</th>
+            </tr>
+        </thead>
+        <tbody id="profileList"></tbody>
+    </table>
+    
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
@@ -86,6 +100,12 @@
             const { data, error } = await supabase.from('netflix').select('*');
             if (error) console.error(error);
             else renderAccounts(data);
+        }
+
+        async function fetchProfiles() {
+            const { data, error } = await supabase.from('clientes').select('id, nombre_cliente, nombre_perfil, cuenta_id, netflix(fecha_vencimiento)');
+            if (error) console.error(error);
+            else renderProfiles(data);
         }
 
         function renderAccounts(accounts) {
@@ -109,6 +129,21 @@
             });
         }
 
+        function renderProfiles(profiles) {
+            const tableBody = document.getElementById('profileList');
+            tableBody.innerHTML = '';
+            profiles.forEach(profile => {
+                const row = `<tr>
+                    <td>${profile.id}</td>
+                    <td>${profile.nombre_cliente}</td>
+                    <td>${profile.nombre_perfil}</td>
+                    <td>${profile.cuenta_id}</td>
+                    <td>${profile.netflix ? profile.netflix.fecha_vencimiento : ''}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
         async function addAccount(event) {
             event.preventDefault();
             const correo = document.getElementById('correo').value;
@@ -117,13 +152,7 @@
             const perfiles = document.getElementById('perfiles').value;
             const fecha_vencimiento = document.getElementById('fecha_vencimiento').value;
             
-            await supabase.from('netflix').insert([{ 
-                correo, 
-                contraseña, 
-                plataforma, 
-                perfiles, 
-                fecha_vencimiento
-            }]);
+            await supabase.from('netflix').insert([{ correo, contraseña, plataforma, perfiles, fecha_vencimiento }]);
             fetchAccounts();
         }
 
@@ -133,12 +162,8 @@
             const nombre_cliente = document.getElementById('nombre_cliente').value;
             const nombre_perfil = document.getElementById('nombre_perfil').value;
             
-            const { data: account } = await supabase.from('netflix').select('perfiles').eq('id', cuentaId).single();
-            if (account.perfiles > 0) {
-                await supabase.from('netflix').update({ perfiles: account.perfiles - 1 }).eq('id', cuentaId);
-                await supabase.from('clientes').insert([{ cuenta_id: cuentaId, nombre_cliente, nombre_perfil }]);
-            }
-            fetchAccounts();
+            await supabase.from('clientes').insert([{ cuenta_id: cuentaId, nombre_cliente, nombre_perfil }]);
+            fetchProfiles();
         }
 
         async function deleteAccount(id) {
@@ -148,7 +173,7 @@
 
         document.getElementById('addAccountForm').addEventListener('submit', addAccount);
         document.getElementById('assignProfileForm').addEventListener('submit', assignProfile);
-        document.addEventListener('DOMContentLoaded', fetchAccounts);
+        document.addEventListener('DOMContentLoaded', () => { fetchAccounts(); fetchProfiles(); });
     </script>
 </body>
 </html>
