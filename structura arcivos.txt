@@ -1,0 +1,78 @@
+📂 Estructura del Sistema de Gestión de Cuentas
+Este sistema está diseñado para administrar la compra, venta y gestión de cuentas de plataformas de streaming. Se pueden manejar cuentas completas o perfiles individuales. Además, hay una sección de soporte para reemplazar cuentas o migrar perfiles en caso de caída.
+
+🌍 Estructura de Carpetas y Archivos
+bash
+Copiar
+Editar
+/gestion-cuentas
+│── /css                    
+│   ├── styles.css          # Estilos generales de todo el sistema
+│
+│── /js                    
+│   ├── main.js             # Funciones generales y eventos principales del sistema
+│   ├── cuentas.js          # Manejo de cuentas completas (registro, edición, eliminación)
+│   ├── perfiles.js         # Manejo de perfiles individuales (registro, edición, eliminación)
+│   ├── soporte.js          # Gestión de cuentas caídas y migración de perfiles
+│   ├── panel.js            # Panel de control para visualizar el estado de todas las cuentas/perfiles
+│
+│── /pages                  
+│   ├── ventas.html         # Página con opciones para registrar una cuenta completa o un perfil individual
+│   ├── cuenta_completa.html # Formulario para registrar una cuenta completa
+│   ├── perfil_individual.html # Formulario para registrar la venta de un perfil individual
+│   ├── soporte.html        # Página para reemplazar cuentas caídas y migrar perfiles
+│   ├── panel.html          # Panel para visualizar y administrar todas las cuentas y perfiles existentes
+│
+│── index.html              # Menú principal con dos opciones: "Soporte" y "Gestión de Cuentas"
+│── README.md               # Documentación del sistema
+📌 Explicación de cada archivo y su función
+📁 /css (Estilos del sistema)
+styles.css: Define el diseño general de la plataforma, como colores, botones y estructura visual.
+📁 /js (Lógica del sistema)
+main.js: Contiene funciones generales como navegación entre páginas y validaciones básicas.
+cuentas.js: Maneja las cuentas completas, permitiendo registrar, editar y eliminar cuentas.
+perfiles.js: Administra la venta y asignación de perfiles individuales dentro de una cuenta.
+soporte.js: Se encarga de reemplazar cuentas caídas y mover perfiles de una cuenta a otra.
+panel.js: Carga la información en el panel de control y muestra estadísticas de cuentas y perfiles.
+📁 /pages (Páginas internas del sistema)
+ventas.html: Muestra dos botones:
+"Cuenta Completa" → Lleva a cuenta_completa.html
+"Perfil Individual" → Lleva a perfil_individual.html
+cuenta_completa.html: Formulario donde se registran los siguientes datos de una cuenta completa:
+📧 Correo
+🔢 Cantidad de Perfiles
+📅 Fecha de Vencimiento
+🎥 Plataforma (Netflix, Disney, HBO, etc.)
+perfil_individual.html: Formulario donde se registran los siguientes datos de un perfil vendido:
+👤 Nombre del Cliente
+🆔 Perfil Asignado
+🔢 PIN del Cliente
+🔐 Contraseña de la Cuenta
+📧 Correo de la Cuenta
+📅 Fecha de Vencimiento (se pondrá en rojo si faltan 2 días)
+⚠️ Si la fecha expira, aparecerá un mensaje: "Pasar a Corte" con dos opciones:
+❌ Cortar (eliminar el perfil)
+🔄 Renovar (extender la suscripción)
+soporte.html: Permite gestionar problemas con cuentas caídas. Aquí se pueden:
+📌 Ver cuentas caídas
+🔄 Reemplazar una cuenta
+🔀 Migrar perfiles de una cuenta caída a una nueva
+📝 Ver historial de cambios
+panel.html: Muestra un resumen general de todas las cuentas y perfiles con opciones para:
+👀 Visualizar cuántos perfiles están ocupados/libres
+🔑 Ver contraseñas y detalles de cuentas
+🔄 Reemplazar cuentas completas
+🔀 Reemplazar perfiles individuales
+📝 Consultar el historial de cambios y registros
+📜 Flujo de Uso del Sistema
+Menú Principal (index.html)
+Opciones: Soporte o Gestión de Cuentas
+Gestión de Cuentas (ventas.html)
+Elegir entre Registrar Cuenta Completa o Registrar Perfil Individual
+Registro de Cuentas o Perfiles (cuenta_completa.html / perfil_individual.html)
+Se ingresan los datos necesarios y se guardan en el sistema.
+Panel de Control (panel.html)
+Se visualizan todas las cuentas y perfiles registrados.
+Se pueden hacer cambios y reemplazos si es necesario.
+Soporte (soporte.html)
+Se gestionan cuentas caídas y se migran perfiles si es necesario.
