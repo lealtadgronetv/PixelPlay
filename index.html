@@ -152,6 +152,16 @@
             </div>
             
             <div class="form-group">
+                <label for="telefono_cliente">Número de Celular:</label>
+                <input type="tel" id="telefono_cliente" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="pin_perfil">PIN (opcional):</label>
+                <input type="text" id="pin_perfil">
+            </div>
+            
+            <div class="form-group">
                 <label for="nombre_perfil">Nombre del Perfil:</label>
                 <input type="text" id="nombre_perfil" required>
             </div>
@@ -170,6 +180,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Correo</th>
+                    <th>Contraseña</th>
                     <th>Plataforma</th>
                     <th>Perfiles Disponibles</th>
                     <th>Fecha Vencimiento</th>
@@ -185,8 +196,11 @@
                 <tr>
                     <th>ID</th>
                     <th>Nombre Cliente</th>
+                    <th>Teléfono</th>
                     <th>Nombre del Perfil</th>
+                    <th>PIN</th>
                     <th>Cuenta Asociada</th>
+                    <th>Contraseña</th>
                     <th>Fecha Vencimiento</th>
                     <th>Acciones</th>
                 </tr>
@@ -278,6 +292,86 @@
         const supabaseUrl = 'https://vdsdtouiokgvzrscaroe.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA';
         const supabase = createClient(supabaseUrl, supabaseKey);
+
+        // Verificar y actualizar la estructura de la tabla clientes si es necesario
+        async function checkAndUpdateClientesTable() {
+            try {
+                // Verificar si existen las columnas telefono y pin
+                const { data, error } = await supabase.rpc('check_column_exists', { 
+                    table_name: 'clientes', 
+                    column_name: 'telefono' 
+                });
+                
+                if (error) {
+                    console.error("Error al verificar estructura de tabla:", error);
+                    return;
+                }
+                
+                if (!data) {
+                    console.log("Añadiendo columna 'telefono' a la tabla clientes");
+                    await supabase.rpc('add_column_if_not_exists', {
+                        table_name: 'clientes',
+                        column_name: 'telefono',
+                        column_type: 'text'
+                    });
+                }
+                
+                // Verificar columna pin
+                const { data: pinExists, error: pinError } = await supabase.rpc('check_column_exists', { 
+                    table_name: 'clientes', 
+                    column_name: 'pin' 
+                });
+                
+                if (pinError) {
+                    console.error("Error al verificar estructura de tabla:", pinError);
+                    return;
+                }
+                
+                if (!pinExists) {
+                    console.log("Añadiendo columna 'pin' a la tabla clientes");
+                    await supabase.rpc('add_column_if_not_exists', {
+                        table_name: 'clientes',
+                        column_name: 'pin',
+                        column_type: 'text'
+                    });
+                }
+                
+                console.log("Estructura de tabla verificada y actualizada si fue necesario");
+            } catch (e) {
+                console.error("Error al actualizar estructura de tabla:", e);
+                
+                // Fallback: Intentar usar SQL directo si la función RPC no existe
+                try {
+                    // Intentar añadir columna telefono
+                    await supabase.from('clientes').update({ telefono: null }).eq('id', -1);
+                    console.log("Columna telefono parece existir o se agregó automáticamente");
+                } catch (err) {
+                    console.log("Intentando crear columna telefono mediante SQL");
+                    try {
+                        await supabase.rpc('execute_sql', { 
+                            sql: "ALTER TABLE clientes ADD COLUMN IF NOT EXISTS telefono TEXT" 
+                        });
+                    } catch (sqlErr) {
+                        console.error("No se pudo añadir columna telefono:", sqlErr);
+                    }
+                }
+                
+                // Intentar añadir columna pin
+                try {
+                    await supabase.from('clientes').update({ pin: null }).eq('id', -1);
+                    console.log("Columna pin parece existir o se agregó automáticamente");
+                } catch (err) {
+                    console.log("Intentando crear columna pin mediante SQL");
+                    try {
+                        await supabase.rpc('execute_sql', { 
+                            sql: "ALTER TABLE clientes ADD COLUMN IF NOT EXISTS pin TEXT" 
+                        });
+                    } catch (sqlErr) {
+                        console.error("No se pudo añadir columna pin:", sqlErr);
+                    }
+                }
+            }
+        }
 
         // Exponer funciones al ámbito global
         window.deleteAccount = async function(id) {
@@ -481,7 +575,7 @@
         async function fetchProfiles() {
             const { data, error } = await supabase
                 .from('clientes')
-                .select('id, nombre_cliente, nombre_perfil, cuenta_id, netflix(correo, fecha_vencimiento)');
+                .select('id, nombre_cliente, nombre_perfil, telefono, pin, cuenta_id, netflix(correo, contraseña, fecha_vencimiento)');
             if (error) console.error(error);
             else renderProfiles(data);
         }
@@ -515,6 +609,7 @@
                 const row = `<tr>
                     <td>${account.id}</td>
                     <td>${account.correo}</td>
+                    <td>${account.contraseña}</td>
                     <td>${account.plataforma}</td>
                     <td>${account.perfiles}</td>
                     <td class="${claseFecha}">${account.fecha_vencimiento} ${diasRestantes <= 7 ? `(${diasRestantes} días)` : ''}</td>
@@ -553,8 +648,11 @@
                 const row = `<tr>
                     <td>${profile.id}</td>
                     <td>${profile.nombre_cliente}</td>
+                    <td>${profile.telefono || 'N/A'}</td>
                     <td>${profile.nombre_perfil}</td>
+                    <td>${profile.pin || 'N/A'}</td>
                     <td>${profile.netflix ? profile.netflix.correo : 'N/A'}</td>
+                    <td>${profile.netflix ? profile.netflix.contraseña : 'N/A'}</td>
                     <td class="${claseFecha}">${profile.netflix ? profile.netflix.fecha_vencimiento : 'N/A'}</td>
                     <td>
                         <button onclick="moveProfile(${profile.id}, ${profile.cuenta_id}, '${profile.nombre_cliente}', '${profile.nombre_perfil}')">Mover</button>
@@ -621,6 +719,8 @@
             event.preventDefault();
             const cuentaId = parseInt(document.getElementById('cuenta').value);
             const nombre_cliente = document.getElementById('nombre_cliente').value;
+            const telefono_cliente = document.getElementById('telefono_cliente').value;
+            const pin_perfil = document.getElementById('pin_perfil').value;
             const nombre_perfil = document.getElementById('nombre_perfil').value;
             
             try {
@@ -641,7 +741,13 @@
                 // Agregar el perfil
                 const { data, error: insertError } = await supabase
                     .from('clientes')
-                    .insert([{ cuenta_id: cuentaId, nombre_cliente, nombre_perfil }])
+                    .insert([{ 
+                        cuenta_id: cuentaId, 
+                        nombre_cliente, 
+                        telefono: telefono_cliente, 
+                        pin: pin_perfil, 
+                        nombre_perfil 
+                    }])
                     .select();
                 
                 if (insertError) throw insertError;
@@ -658,7 +764,18 @@
                 await supabase.from('historial').insert([{
                     fecha: new Date().toISOString(),
                     tipo: 'Asignación de Perfil',
-                    descripcion: `Perfil ${nombre_perfil} asignado a ${nombre_cliente} en cuenta ${accountData.correo}`
+                    descripcion: `Perfil ${nombre_perfil} asignado a ${nombre_cliente} (Tel: ${telefono_cliente}) en cuenta ${accountData.correo}`
+                }]);
+                
+                document.getElementById('assignProfileForm').reset();
+                fetchAccounts();
+                fetchProfiles();
+                fetchHistory();
+// Registrar en historial
+                await supabase.from('historial').insert([{
+                    fecha: new Date().toISOString(),
+                    tipo: 'Asignación de Perfil',
+                    descripcion: `Perfil ${nombre_perfil} asignado a ${nombre_cliente} (Tel: ${telefono_cliente}) en cuenta ${accountData.correo}`
                 }]);
                 
                 document.getElementById('assignProfileForm').reset();
@@ -667,10 +784,10 @@
                 fetchHistory();
             } catch (error) {
                 console.error("Error al asignar perfil:", error);
-                alert("Ocurrió un error al asignar el perfil. Consulta la consola para más detalles.");
+                alert("Error al asignar el perfil. Consulta la consola para más detalles.");
             }
         }
-        
+
         async function substituteAccount(event) {
             event.preventDefault();
             const oldAccountId = document.getElementById('old_account_id').value;
@@ -679,22 +796,24 @@
             const newFechaVencimiento = document.getElementById('new_fecha_vencimiento').value;
             
             try {
-                // Obtener datos de la cuenta antigua
+                // Obtener información de la cuenta anterior
                 const { data: oldAccount } = await supabase
                     .from('netflix')
-                    .select('*')
+                    .select('correo, plataforma, perfiles')
                     .eq('id', oldAccountId)
                     .single();
                 
-                // Actualizar la cuenta con los nuevos datos
-                await supabase
+                // Actualizar la cuenta con la nueva información
+                const { error } = await supabase
                     .from('netflix')
                     .update({ 
-                        correo: newCorreo,
-                        contraseña: newContraseña,
-                        fecha_vencimiento: newFechaVencimiento
+                        correo: newCorreo, 
+                        contraseña: newContraseña, 
+                        fecha_vencimiento: newFechaVencimiento 
                     })
                     .eq('id', oldAccountId);
+                
+                if (error) throw error;
                 
                 // Registrar en historial
                 await supabase.from('historial').insert([{
@@ -708,14 +827,12 @@
                 fetchAccounts();
                 fetchProfiles();
                 fetchHistory();
-                
-                alert("Cuenta sustituida exitosamente.");
             } catch (error) {
-                console.error("Error al sustituir la cuenta:", error);
-                alert("Ocurrió un error al sustituir la cuenta.");
+                console.error("Error al sustituir cuenta:", error);
+                alert("Error al sustituir la cuenta. Consulta la consola para más detalles.");
             }
         }
-        
+
         async function moveProfile(event) {
             event.preventDefault();
             const profileId = document.getElementById('profile_id').value;
@@ -723,38 +840,39 @@
             const targetAccountId = document.getElementById('target_account').value;
             
             try {
-                // Obtener información del perfil
+                // Obtener información del perfil y las cuentas
                 const { data: profileData } = await supabase
                     .from('clientes')
                     .select('nombre_cliente, nombre_perfil')
                     .eq('id', profileId)
                     .single();
                 
-                // Obtener información de las cuentas
                 const { data: currentAccount } = await supabase
                     .from('netflix')
                     .select('correo, perfiles')
                     .eq('id', currentAccountId)
                     .single();
-                    
+                
                 const { data: targetAccount } = await supabase
                     .from('netflix')
                     .select('correo, perfiles')
                     .eq('id', targetAccountId)
                     .single();
                 
-                // Mover el perfil
-                await supabase
+                // Actualizar la cuenta del perfil
+                const { error: updateError } = await supabase
                     .from('clientes')
                     .update({ cuenta_id: targetAccountId })
                     .eq('id', profileId);
                 
-                // Actualizar perfiles disponibles
+                if (updateError) throw updateError;
+                
+                // Actualizar perfiles disponibles de ambas cuentas
                 await supabase
                     .from('netflix')
                     .update({ perfiles: currentAccount.perfiles + 1 })
                     .eq('id', currentAccountId);
-                    
+                
                 await supabase
                     .from('netflix')
                     .update({ perfiles: targetAccount.perfiles - 1 })
@@ -771,33 +889,34 @@
                 fetchAccounts();
                 fetchProfiles();
                 fetchHistory();
-                
-                alert("Perfil movido exitosamente.");
             } catch (error) {
-                console.error("Error al mover el perfil:", error);
-                alert("Ocurrió un error al mover el perfil.");
+                console.error("Error al mover perfil:", error);
+                alert("Error al mover el perfil. Consulta la consola para más detalles.");
             }
         }
-// Event listeners
-        document.getElementById('addAccountForm').addEventListener('submit', addAccount);
-        document.getElementById('assignProfileForm').addEventListener('submit', assignProfile);
-        document.getElementById('substituteAccountForm').addEventListener('submit', substituteAccount);
-        document.getElementById('moveProfileForm').addEventListener('submit', moveProfile);
-        
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Verificar si la tabla de historial existe, si no, crearla
-            const { error } = await supabase.from('historial').select('id').limit(1);
-            if (error && error.code === 'PGRST116') {
-                console.log('Tabla de historial no existe, creándola...');
-                // Esta parte sería manejada por las migraciones de Supabase
-                // Pero podrías añadir notificación al usuario
-                alert("Inicializando el sistema por primera vez. Se configurará la base de datos.");
-            }
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Verificar y actualizar la estructura de la tabla
+            await checkAndUpdateClientesTable();
             
-            fetchAccounts(); 
+            // Cargar datos iniciales
+            fetchAccounts();
             fetchProfiles();
             fetchHistory();
+            
+            // Configurar event listeners para los formularios
+            document.getElementById('addAccountForm').addEventListener('submit', addAccount);
+            document.getElementById('assignProfileForm').addEventListener('submit', assignProfile);
+            document.getElementById('substituteAccountForm').addEventListener('submit', substituteAccount);
+            document.getElementById('moveProfileForm').addEventListener('submit', moveProfile);
+            
+            // Cerrar modales cuando se hace clic fuera del contenido
+            window.onclick = function(event) {
+                if (event.target.className === 'modal') {
+                    closeModal(event.target.id);
+                }
+            };
         });
     </script>
 </body>
