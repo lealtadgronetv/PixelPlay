@@ -84,6 +84,7 @@
                 <th>Nombre del Perfil</th>
                 <th>Cuenta Asociada</th>
                 <th>Fecha Vencimiento</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody id="profileList"></tbody>
@@ -96,6 +97,49 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA';
         const supabase = createClient(supabaseUrl, supabaseKey);
 
+        // Exponer la función deleteAccount al ámbito global
+        window.deleteAccount = async function(id) {
+            await supabase.from('netflix').delete().eq('id', id);
+            fetchAccounts();
+            fetchProfiles();
+        };
+
+        // Exponer la función deleteProfile al ámbito global
+        window.deleteProfile = async function(id, cuentaId) {
+            try {
+                // Primero obtenemos la información de la cuenta para actualizar los perfiles disponibles
+                const { data: accountData, error: accountError } = await supabase
+                    .from('netflix')
+                    .select('perfiles')
+                    .eq('id', cuentaId)
+                    .single();
+                
+                if (accountError) throw accountError;
+                
+                // Eliminar el perfil
+                const { error: deleteError } = await supabase
+                    .from('clientes')
+                    .delete()
+                    .eq('id', id);
+                
+                if (deleteError) throw deleteError;
+                
+                // Actualizar los perfiles disponibles (+1)
+                const { error: updateError } = await supabase
+                    .from('netflix')
+                    .update({ perfiles: accountData.perfiles + 1 })
+                    .eq('id', cuentaId);
+                
+                if (updateError) throw updateError;
+                
+                fetchAccounts();
+                fetchProfiles();
+            } catch (error) {
+                console.error("Error al eliminar el perfil:", error);
+                alert("Ocurrió un error al eliminar el perfil. Consulta la consola para más detalles.");
+            }
+        };
+
         async function fetchAccounts() {
             const { data, error } = await supabase.from('netflix').select('*');
             if (error) console.error(error);
@@ -103,7 +147,9 @@
         }
 
         async function fetchProfiles() {
-            const { data, error } = await supabase.from('clientes').select('id, nombre_cliente, nombre_perfil, cuenta_id, netflix(fecha_vencimiento)');
+            const { data, error } = await supabase
+                .from('clientes')
+                .select('id, nombre_cliente, nombre_perfil, cuenta_id, netflix(correo, fecha_vencimiento)');
             if (error) console.error(error);
             else renderProfiles(data);
         }
@@ -137,8 +183,9 @@
                     <td>${profile.id}</td>
                     <td>${profile.nombre_cliente}</td>
                     <td>${profile.nombre_perfil}</td>
-                    <td>${profile.cuenta_id}</td>
-                    <td>${profile.netflix ? profile.netflix.fecha_vencimiento : ''}</td>
+                    <td>${profile.netflix ? profile.netflix.correo : 'N/A'}</td>
+                    <td>${profile.netflix ? profile.netflix.fecha_vencimiento : 'N/A'}</td>
+                    <td><button onclick="deleteProfile(${profile.id}, ${profile.cuenta_id})">Eliminar</button></td>
                 </tr>`;
                 tableBody.innerHTML += row;
             });
@@ -149,31 +196,79 @@
             const correo = document.getElementById('correo').value;
             const contraseña = document.getElementById('contraseña').value;
             const plataforma = document.getElementById('plataforma').value;
-            const perfiles = document.getElementById('perfiles').value;
+            const perfiles = parseInt(document.getElementById('perfiles').value);
             const fecha_vencimiento = document.getElementById('fecha_vencimiento').value;
             
-            await supabase.from('netflix').insert([{ correo, contraseña, plataforma, perfiles, fecha_vencimiento }]);
-            fetchAccounts();
+            const { error } = await supabase.from('netflix').insert([{ 
+                correo, 
+                contraseña, 
+                plataforma, 
+                perfiles, 
+                fecha_vencimiento 
+            }]);
+            
+            if (error) {
+                console.error("Error al agregar cuenta:", error);
+                alert("Error al agregar la cuenta. Consulta la consola para más detalles.");
+            } else {
+                document.getElementById('addAccountForm').reset();
+                fetchAccounts();
+            }
         }
 
         async function assignProfile(event) {
             event.preventDefault();
-            const cuentaId = document.getElementById('cuenta').value;
+            const cuentaId = parseInt(document.getElementById('cuenta').value);
             const nombre_cliente = document.getElementById('nombre_cliente').value;
             const nombre_perfil = document.getElementById('nombre_perfil').value;
             
-            await supabase.from('clientes').insert([{ cuenta_id: cuentaId, nombre_cliente, nombre_perfil }]);
-            fetchProfiles();
-        }
-
-        async function deleteAccount(id) {
-            await supabase.from('netflix').delete().eq('id', id);
-            fetchAccounts();
+            try {
+                // Obtener información de la cuenta
+                const { data: accountData, error: accountError } = await supabase
+                    .from('netflix')
+                    .select('perfiles')
+                    .eq('id', cuentaId)
+                    .single();
+                
+                if (accountError) throw accountError;
+                
+                if (accountData.perfiles <= 0) {
+                    alert("Esta cuenta no tiene perfiles disponibles.");
+                    return;
+                }
+                
+                // Agregar el perfil
+                const { error: insertError } = await supabase
+                    .from('clientes')
+                    .insert([{ cuenta_id: cuentaId, nombre_cliente, nombre_perfil }]);
+                
+                if (insertError) throw insertError;
+                
+                // Actualizar los perfiles disponibles (-1)
+                const { error: updateError } = await supabase
+                    .from('netflix')
+                    .update({ perfiles: accountData.perfiles - 1 })
+                    .eq('id', cuentaId);
+                
+                if (updateError) throw updateError;
+                
+                document.getElementById('assignProfileForm').reset();
+                fetchAccounts();
+                fetchProfiles();
+            } catch (error) {
+                console.error("Error al asignar perfil:", error);
+                alert("Ocurrió un error al asignar el perfil. Consulta la consola para más detalles.");
+            }
         }
 
         document.getElementById('addAccountForm').addEventListener('submit', addAccount);
         document.getElementById('assignProfileForm').addEventListener('submit', assignProfile);
-        document.addEventListener('DOMContentLoaded', () => { fetchAccounts(); fetchProfiles(); });
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => { 
+            fetchAccounts(); 
+            fetchProfiles(); 
+        });
     </script>
 </body>
 </html>
