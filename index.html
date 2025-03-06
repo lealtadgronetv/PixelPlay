@@ -32,9 +32,7 @@
                     <th>Perfiles</th>
                 </tr>
             </thead>
-            <tbody id="tabla-cuentas">
-                <!-- Aquí se mostrarán las cuentas -->
-            </tbody>
+            <tbody id="tabla-cuentas"></tbody>
         </table>
     </section>
 
@@ -45,10 +43,13 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        window.mostrarSeccion = function (seccion) {
+        window.mostrarSeccion = async function (seccion) {
             document.getElementById("soporte").style.display = seccion === "soporte" ? "block" : "none";
             document.getElementById("ventas").style.display = seccion === "ventas" ? "block" : "none";
-            if (seccion === "ventas") cargarCuentas();
+            
+            if (seccion === "ventas") {
+                cargarCuentas();
+            }
         };
 
         document.getElementById("form-cuenta").addEventListener("submit", async function (event) {
@@ -64,26 +65,22 @@
             } else {
                 alert("Cuenta agregada correctamente");
                 document.getElementById("form-cuenta").reset();
-                cargarCuentas();
             }
         });
 
         async function cargarCuentas() {
             let { data, error } = await supabase.from("cuentas").select("correo, plataforma, perfiles");
             if (error) {
-                console.error("Error al cargar cuentas:", error);
+                alert("Error al cargar las cuentas: " + error.message);
                 return;
             }
-            const tabla = document.getElementById("tabla-cuentas");
+            let tabla = document.getElementById("tabla-cuentas");
             tabla.innerHTML = "";
             data.forEach(cuenta => {
                 let fila = `<tr><td>${cuenta.correo}</td><td>${cuenta.plataforma}</td><td>${cuenta.perfiles}</td></tr>`;
                 tabla.innerHTML += fila;
             });
         }
-
-        cargarCuentas(); // Cargar cuentas al iniciar
     </script>
 </body>
 </html>
-
