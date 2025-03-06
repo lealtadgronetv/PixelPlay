@@ -5,99 +5,232 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Cuentas</title>
     <link rel="stylesheet" href="styles.css">
-    <script defer src="app.js"></script>
 </head>
 <body>
-    <h1>Sistema de Gestión de Cuentas</h1>
+    <header>
+        <h1>Sistema de Gestión de Cuentas</h1>
+    </header>
     
-    <!-- Panel de Control -->
-    <section>
-        <h2>Panel de Control</h2>
-        <p>Total de Cuentas Activas: <span id="totalActivas">0</span></p>
-        <p>Cuentas Caídas: <span id="totalCaidas">0</span></p>
-        <p>Perfiles Disponibles: <span id="totalPerfiles">0</span></p>
-        <p>Próximos Vencimientos: <span id="proximosVencimientos">0</span></p>
-    </section>
+    <main>
+        <!-- Panel de Control -->
+        <section class="panel">
+            <h2>Panel de Control</h2>
+            <div class="stats-container">
+                <div class="stat-box">
+                    <p>Cuentas Activas</p>
+                    <span id="totalActivas">0</span>
+                </div>
+                <div class="stat-box">
+                    <p>Cuentas Caídas</p>
+                    <span id="totalCaidas">0</span>
+                </div>
+                <div class="stat-box">
+                    <p>Perfiles Disponibles</p>
+                    <span id="totalPerfiles">0</span>
+                </div>
+                <div class="stat-box">
+                    <p>Próximos Vencimientos</p>
+                    <span id="proximosVencimientos">0</span>
+                </div>
+            </div>
+        </section>
+        
+        <div class="form-container">
+            <!-- Registro de Cuenta Completa -->
+            <section class="form-section">
+                <h2>Registrar Cuenta Completa</h2>
+                <form id="registroCuenta">
+                    <div class="form-group">
+                        <label for="correo">Correo:</label>
+                        <input type="email" id="correo" placeholder="Correo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contraseña">Contraseña:</label>
+                        <input type="password" id="contraseña" placeholder="Contraseña" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="perfiles">Cantidad de Perfiles:</label>
+                        <input type="number" id="perfiles" placeholder="Cantidad de Perfiles" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha_vencimiento">Fecha de Vencimiento:</label>
+                        <input type="date" id="fecha_vencimiento" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Registrar</button>
+                </form>
+            </section>
+            
+            <!-- Asignación de Perfiles -->
+            <section class="form-section">
+                <h2>Asignar Perfil</h2>
+                <form id="asignarPerfil">
+                    <div class="form-group">
+                        <label for="cuentasDisponibles">Seleccionar Cuenta:</label>
+                        <select id="cuentasDisponibles"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombreCliente">Nombre del Cliente:</label>
+                        <input type="text" id="nombreCliente" placeholder="Nombre del Cliente" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="whatsapp">WhatsApp del Cliente:</label>
+                        <input type="tel" id="whatsapp" placeholder="WhatsApp del Cliente" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Asignar</button>
+                    <p id="advertencia" class="error-message">⚠️ No hay perfiles disponibles en esta cuenta.</p>
+                </form>
+            </section>
+            
+            <!-- Reemplazo de Cuentas Caídas -->
+            <section class="form-section">
+                <h2>Reemplazo de Cuentas Caídas</h2>
+                <form id="reemplazoCuenta">
+                    <div class="form-group">
+                        <label for="cuentaCaida">Seleccionar Cuenta Caída:</label>
+                        <select id="cuentaCaida"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nuevoCorreo">Nuevo Correo:</label>
+                        <input type="email" id="nuevoCorreo" placeholder="Nuevo Correo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nuevaContraseña">Nueva Contraseña:</label>
+                        <input type="password" id="nuevaContraseña" placeholder="Nueva Contraseña" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nuevaFechaVencimiento">Nueva Fecha de Vencimiento:</label>
+                        <input type="date" id="nuevaFechaVencimiento" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Reemplazar Cuenta</button>
+                </form>
+            </section>
+        </div>
+        
+        <div class="display-container">
+            <!-- Lista de Clientes con Búsqueda -->
+            <section class="display-section">
+                <h2>Lista de Clientes</h2>
+                <div class="search-box">
+                    <input type="text" id="buscarCliente" placeholder="Buscar Cliente...">
+                    <button id="btnBuscar" class="btn btn-secondary">Buscar</button>
+                </div>
+                <div class="list-container">
+                    <ul id="listaClientes"></ul>
+                </div>
+            </section>
+            
+            <!-- Historial de Movimientos -->
+            <section class="display-section">
+                <h2>Historial de Movimientos</h2>
+                <div class="list-container">
+                    <ul id="historialMovimientos"></ul>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Notificaciones y Exportación -->
+        <section class="action-section">
+            <div class="action-group">
+                <h2>Notificaciones</h2>
+                <button id="enviarNotificaciones" class="btn btn-warning">Enviar Notificaciones de Renovación</button>
+            </div>
+            
+            <div class="action-group">
+                <h2>Exportar Datos</h2>
+                <div class="btn-group">
+                    <button id="exportarExcel" class="btn btn-success">Exportar a Excel</button>
+                    <button id="exportarPDF" class="btn btn-danger">Exportar a PDF</button>
+                </div>
+            </div>
+            
+            <div class="action-group">
+                <h2>Notas y Comentarios</h2>
+                <div class="notes-container">
+                    <textarea id="notaGeneral" placeholder="Agregar nota general..."></textarea>
+                    <button id="guardarNota" class="btn btn-info">Guardar Nota</button>
+                </div>
+            </div>
+        </section>
+    </main>
     
-    <!-- Registro de Cuenta Completa -->
-    <section>
-        <h2>Registrar Cuenta Completa</h2>
-        <form id="registroCuenta">
-            <input type="email" id="correo" placeholder="Correo" required>
-            <input type="password" id="contraseña" placeholder="Contraseña" required>
-            <input type="number" id="perfiles" placeholder="Cantidad de Perfiles" required>
-            <input type="date" id="fecha_vencimiento" required>
-            <button type="submit">Registrar</button>
-        </form>
-    </section>
-    
-    <!-- Asignación de Perfiles -->
-    <section>
-        <h2>Asignar Perfil</h2>
-        <form id="asignarPerfil">
-            <select id="cuentasDisponibles"></select>
-            <input type="text" id="nombreCliente" placeholder="Nombre del Cliente" required>
-            <input type="tel" id="whatsapp" placeholder="WhatsApp del Cliente" required>
-            <button type="submit">Asignar</button>
-        </form>
-        <p id="advertencia" style="color: red; display: none;">⚠️ No hay perfiles disponibles en esta cuenta.</p>
-    </section>
-    
-    <!-- Historial de Movimientos -->
-    <section>
-        <h2>Historial de Movimientos</h2>
-        <ul id="historialMovimientos"></ul>
-    </section>
-    
-    <!-- Notificaciones de Renovación -->
-    <section>
-        <h2>Notificaciones</h2>
-        <button id="enviarNotificaciones">Enviar Notificaciones de Renovación</button>
-    </section>
-    
-    <!-- Reemplazo de Cuentas Caídas -->
-    <section>
-        <h2>Reemplazo de Cuentas Caídas</h2>
-        <form id="reemplazoCuenta">
-            <select id="cuentaCaida"></select>
-            <input type="email" id="nuevoCorreo" placeholder="Nuevo Correo" required>
-            <input type="password" id="nuevaContraseña" placeholder="Nueva Contraseña" required>
-            <input type="date" id="nuevaFechaVencimiento" required>
-            <button type="submit">Reemplazar Cuenta</button>
-        </form>
-    </section>
-    
-    <!-- Lista de Clientes con Búsqueda -->
-    <section>
-        <h2>Lista de Clientes</h2>
-        <input type="text" id="buscarCliente" placeholder="Buscar Cliente...">
-        <ul id="listaClientes"></ul>
-    </section>
-    
-    <!-- Exportar Datos -->
-    <section>
-        <h2>Exportar Datos</h2>
-        <button id="exportarExcel">Exportar a Excel</button>
-        <button id="exportarPDF">Exportar a PDF</button>
-    </section>
-    
-    <!-- Notas y Comentarios -->
-    <section>
-        <h2>Notas y Comentarios</h2>
-        <textarea id="notaGeneral" placeholder="Agregar nota general..."></textarea>
-        <button id="guardarNota">Guardar Nota</button>
-    </section>
+    <footer>
+        <p>&copy; 2025 Sistema de Gestión de Cuentas</p>
+    </footer>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Elementos DOM
             const registroCuenta = document.getElementById("registroCuenta");
             const asignarPerfil = document.getElementById("asignarPerfil");
             const reemplazoCuenta = document.getElementById("reemplazoCuenta");
             const listaClientes = document.getElementById("listaClientes");
             const historialMovimientos = document.getElementById("historialMovimientos");
+            const buscarClienteInput = document.getElementById("buscarCliente");
+            const btnBuscar = document.getElementById("btnBuscar");
+            const advertencia = document.getElementById("advertencia");
+            const exportarExcel = document.getElementById("exportarExcel");
+            const exportarPDF = document.getElementById("exportarPDF");
+            const enviarNotificaciones = document.getElementById("enviarNotificaciones");
+            const guardarNota = document.getElementById("guardarNota");
             
+            // Ocultar mensaje de advertencia inicialmente
+            advertencia.style.display = "none";
+            
+            // Estado de la aplicación
             let cuentas = [];
             let clientes = [];
+            let historial = [];
+            
+            // Inicializar la aplicación
+            inicializarApp();
+            
+            function inicializarApp() {
+                // Cargar datos del localStorage si existen
+                cargarDatosGuardados();
+                actualizarUI();
+                
+                // Agregar evento para buscar clientes
+                btnBuscar.addEventListener("click", buscarClientes);
+                buscarClienteInput.addEventListener("keyup", function(event) {
+                    if (event.key === "Enter") {
+                        buscarClientes();
+                    }
+                });
+                
+                // Eventos para exportación
+                exportarExcel.addEventListener("click", exportarDatosExcel);
+                exportarPDF.addEventListener("click", exportarDatosPDF);
+                
+                // Evento para notificaciones
+                enviarNotificaciones.addEventListener("click", enviarNotificacionesRenovacion);
+                
+                // Evento para guardar notas
+                guardarNota.addEventListener("click", guardarNotaGeneral);
+            }
+            
+            function cargarDatosGuardados() {
+                const cuentasGuardadas = localStorage.getItem("cuentas");
+                const clientesGuardados = localStorage.getItem("clientes");
+                const historialGuardado = localStorage.getItem("historial");
+                
+                if (cuentasGuardadas) cuentas = JSON.parse(cuentasGuardadas);
+                if (clientesGuardados) clientes = JSON.parse(clientesGuardados);
+                if (historialGuardado) historial = JSON.parse(historialGuardado);
+            }
+            
+            function guardarDatos() {
+                localStorage.setItem("cuentas", JSON.stringify(cuentas));
+                localStorage.setItem("clientes", JSON.stringify(clientes));
+                localStorage.setItem("historial", JSON.stringify(historial));
+            }
+            
+            function actualizarUI() {
+                actualizarCuentasDisponibles();
+                actualizarCuentasCaidas();
+                actualizarListaClientes();
+                actualizarHistorial();
+                actualizarEstadisticas();
+            }
 
             // Registrar Cuenta
             registroCuenta.addEventListener("submit", function(event) {
@@ -107,9 +240,24 @@
                 const perfiles = parseInt(document.getElementById("perfiles").value);
                 const fecha_vencimiento = document.getElementById("fecha_vencimiento").value;
 
-                cuentas.push({ correo, contraseña, perfiles, fecha_vencimiento, ocupados: 0 });
-                actualizarCuentasDisponibles();
-                alert("Cuenta registrada correctamente");
+                const nuevaCuenta = { 
+                    correo, 
+                    contraseña, 
+                    perfiles, 
+                    fecha_vencimiento, 
+                    ocupados: 0,
+                    activa: true,
+                    fechaRegistro: new Date().toISOString()
+                };
+                
+                cuentas.push(nuevaCuenta);
+                
+                // Agregar al historial
+                agregarHistorial(`Cuenta registrada: ${correo} con ${perfiles} perfiles`);
+                
+                guardarDatos();
+                actualizarUI();
+                mostrarMensaje("Cuenta registrada correctamente", "success");
                 registroCuenta.reset();
             });
 
@@ -122,12 +270,26 @@
 
                 if (cuentaIndex !== "" && cuentas[cuentaIndex].ocupados < cuentas[cuentaIndex].perfiles) {
                     cuentas[cuentaIndex].ocupados += 1;
-                    clientes.push({ nombreCliente, whatsapp, cuenta: cuentas[cuentaIndex].correo });
-                    actualizarListaClientes();
-                    alert("Perfil asignado correctamente");
+                    
+                    const nuevoCliente = { 
+                        nombreCliente, 
+                        whatsapp, 
+                        cuenta: cuentas[cuentaIndex].correo,
+                        fechaAsignacion: new Date().toISOString()
+                    };
+                    
+                    clientes.push(nuevoCliente);
+                    
+                    // Agregar al historial
+                    agregarHistorial(`Perfil asignado a ${nombreCliente} en cuenta ${cuentas[cuentaIndex].correo}`);
+                    
+                    guardarDatos();
+                    actualizarUI();
+                    mostrarMensaje("Perfil asignado correctamente", "success");
                     asignarPerfil.reset();
+                    advertencia.style.display = "none";
                 } else {
-                    document.getElementById("advertencia").style.display = "block";
+                    advertencia.style.display = "block";
                 }
             });
 
@@ -138,10 +300,32 @@
                 const nuevoCorreo = document.getElementById("nuevoCorreo").value;
                 const nuevaContraseña = document.getElementById("nuevaContraseña").value;
                 const nuevaFechaVencimiento = document.getElementById("nuevaFechaVencimiento").value;
+                
+                const correoAnterior = cuentas[cuentaIndex].correo;
 
-                cuentas[cuentaIndex] = { correo: nuevoCorreo, contraseña: nuevaContraseña, perfiles: 5, fecha_vencimiento: nuevaFechaVencimiento, ocupados: 0 };
-                actualizarCuentasDisponibles();
-                alert("Cuenta reemplazada correctamente");
+                cuentas[cuentaIndex] = { 
+                    correo: nuevoCorreo, 
+                    contraseña: nuevaContraseña, 
+                    perfiles: cuentas[cuentaIndex].perfiles, 
+                    fecha_vencimiento: nuevaFechaVencimiento, 
+                    ocupados: 0,
+                    activa: true,
+                    fechaRegistro: new Date().toISOString()
+                };
+                
+                // Actualizar clientes con la cuenta anterior
+                clientes.forEach(cliente => {
+                    if (cliente.cuenta === correoAnterior) {
+                        cliente.cuenta = nuevoCorreo;
+                    }
+                });
+                
+                // Agregar al historial
+                agregarHistorial(`Cuenta reemplazada: ${correoAnterior} por ${nuevoCorreo}`);
+                
+                guardarDatos();
+                actualizarUI();
+                mostrarMensaje("Cuenta reemplazada correctamente", "success");
                 reemplazoCuenta.reset();
             });
 
@@ -149,22 +333,260 @@
             function actualizarCuentasDisponibles() {
                 const select = document.getElementById("cuentasDisponibles");
                 select.innerHTML = "";
-                cuentas.forEach((cuenta, index) => {
+                
+                const cuentasActivas = cuentas.filter(cuenta => cuenta.activa);
+                
+                if (cuentasActivas.length === 0) {
+                    const option = document.createElement("option");
+                    option.value = "";
+                    option.textContent = "No hay cuentas disponibles";
+                    select.appendChild(option);
+                    return;
+                }
+                
+                cuentasActivas.forEach((cuenta, index) => {
                     const option = document.createElement("option");
                     option.value = index;
                     option.textContent = `${cuenta.correo} (${cuenta.perfiles - cuenta.ocupados} disponibles)`;
                     select.appendChild(option);
                 });
             }
+            
+            function actualizarCuentasCaidas() {
+                const select = document.getElementById("cuentaCaida");
+                select.innerHTML = "";
+                
+                const cuentasCaidas = cuentas.filter(cuenta => !cuenta.activa);
+                
+                if (cuentasCaidas.length === 0) {
+                    const option = document.createElement("option");
+                    option.value = "";
+                    option.textContent = "No hay cuentas caídas";
+                    select.appendChild(option);
+                    return;
+                }
+                
+                cuentasCaidas.forEach((cuenta, index) => {
+                    const option = document.createElement("option");
+                    option.value = index;
+                    option.textContent = cuenta.correo;
+                    select.appendChild(option);
+                });
+            }
 
             function actualizarListaClientes() {
                 listaClientes.innerHTML = "";
-                clientes.forEach(cliente => {
+                
+                if (clientes.length === 0) {
                     const li = document.createElement("li");
-                    li.textContent = `${cliente.nombreCliente} - ${cliente.whatsapp} (Cuenta: ${cliente.cuenta})`;
+                    li.textContent = "No hay clientes registrados";
+                    li.classList.add("empty-list");
+                    listaClientes.appendChild(li);
+                    return;
+                }
+                
+                clientes.forEach((cliente, index) => {
+                    const li = document.createElement("li");
+                    li.classList.add("cliente-item");
+                    
+                    // Obtener información de la cuenta
+                    const cuenta = cuentas.find(c => c.correo === cliente.cuenta);
+                    const estadoCuenta = cuenta && cuenta.activa ? "Activa" : "Caída";
+                    const claseCuenta = cuenta && cuenta.activa ? "cuenta-activa" : "cuenta-caida";
+                    
+                    li.innerHTML = `
+                        <div class="cliente-info">
+                            <h3>${cliente.nombreCliente}</h3>
+                            <p><strong>WhatsApp:</strong> ${cliente.whatsapp}</p>
+                            <p><strong>Cuenta:</strong> <span class="${claseCuenta}">${cliente.cuenta} (${estadoCuenta})</span></p>
+                            <p><strong>Asignado:</strong> ${formatearFecha(cliente.fechaAsignacion)}</p>
+                        </div>
+                        <div class="cliente-actions">
+                            <button class="btn btn-small btn-info" onclick="editarCliente(${index})">Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="eliminarCliente(${index})">Eliminar</button>
+                        </div>
+                    `;
+                    
                     listaClientes.appendChild(li);
                 });
             }
+            
+            function actualizarHistorial() {
+                historialMovimientos.innerHTML = "";
+                
+                if (historial.length === 0) {
+                    const li = document.createElement("li");
+                    li.textContent = "No hay movimientos registrados";
+                    li.classList.add("empty-list");
+                    historialMovimientos.appendChild(li);
+                    return;
+                }
+                
+                // Mostrar los últimos 10 movimientos
+                const movimientosRecientes = historial.slice(-10).reverse();
+                
+                movimientosRecientes.forEach(movimiento => {
+                    const li = document.createElement("li");
+                    li.classList.add("historial-item");
+                    li.innerHTML = `
+                        <span class="historial-fecha">${formatearFecha(movimiento.fecha)}</span>
+                        <span class="historial-accion">${movimiento.accion}</span>
+                    `;
+                    historialMovimientos.appendChild(li);
+                });
+            }
+            
+            function actualizarEstadisticas() {
+                // Cuentas activas
+                const cuentasActivas = cuentas.filter(cuenta => cuenta.activa).length;
+                document.getElementById("totalActivas").textContent = cuentasActivas;
+                
+                // Cuentas caídas
+                const cuentasCaidas = cuentas.filter(cuenta => !cuenta.activa).length;
+                document.getElementById("totalCaidas").textContent = cuentasCaidas;
+                
+                // Perfiles disponibles
+                let perfilesDisponibles = 0;
+                cuentas.forEach(cuenta => {
+                    if (cuenta.activa) {
+                        perfilesDisponibles += (cuenta.perfiles - cuenta.ocupados);
+                    }
+                });
+                document.getElementById("totalPerfiles").textContent = perfilesDisponibles;
+                
+                // Próximos vencimientos (próximos 7 días)
+                const hoy = new Date();
+                const proximaSemana = new Date();
+                proximaSemana.setDate(hoy.getDate() + 7);
+                
+                const vencimientos = cuentas.filter(cuenta => {
+                    const fechaVencimiento = new Date(cuenta.fecha_vencimiento);
+                    return fechaVencimiento >= hoy && fechaVencimiento <= proximaSemana;
+                }).length;
+                
+                document.getElementById("proximosVencimientos").textContent = vencimientos;
+            }
+            
+            // Funciones de búsqueda
+            function buscarClientes() {
+                const terminoBusqueda = buscarClienteInput.value.toLowerCase();
+                
+                if (terminoBusqueda === "") {
+                    actualizarListaClientes();
+                    return;
+                }
+                
+                const clientesFiltrados = clientes.filter(cliente => 
+                    cliente.nombreCliente.toLowerCase().includes(terminoBusqueda) ||
+                    cliente.whatsapp.toLowerCase().includes(terminoBusqueda) ||
+                    cliente.cuenta.toLowerCase().includes(terminoBusqueda)
+                );
+                
+                mostrarClientesFiltrados(clientesFiltrados);
+            }
+            
+            function mostrarClientesFiltrados(clientesFiltrados) {
+                listaClientes.innerHTML = "";
+                
+                if (clientesFiltrados.length === 0) {
+                    const li = document.createElement("li");
+                    li.textContent = "No se encontraron resultados";
+                    li.classList.add("empty-list");
+                    listaClientes.appendChild(li);
+                    return;
+                }
+                
+                clientesFiltrados.forEach((cliente, index) => {
+                    const li = document.createElement("li");
+                    li.classList.add("cliente-item");
+                    
+                    // Obtener información de la cuenta
+                    const cuenta = cuentas.find(c => c.correo === cliente.cuenta);
+                    const estadoCuenta = cuenta && cuenta.activa ? "Activa" : "Caída";
+                    const claseCuenta = cuenta && cuenta.activa ? "cuenta-activa" : "cuenta-caida";
+                    
+                    li.innerHTML = `
+                        <div class="cliente-info">
+                            <h3>${cliente.nombreCliente}</h3>
+                            <p><strong>WhatsApp:</strong> ${cliente.whatsapp}</p>
+                            <p><strong>Cuenta:</strong> <span class="${claseCuenta}">${cliente.cuenta} (${estadoCuenta})</span></p>
+                        </div>
+                        <div class="cliente-actions">
+                            <button class="btn btn-small btn-info" onclick="editarCliente(${index})">Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="eliminarCliente(${index})">Eliminar</button>
+                        </div>
+                    `;
+                    
+                    listaClientes.appendChild(li);
+                });
+            }
+            
+            // Funciones de historial
+            function agregarHistorial(accion) {
+                const nuevoMovimiento = {
+                    fecha: new Date().toISOString(),
+                    accion: accion
+                };
+                
+                historial.push(nuevoMovimiento);
+            }
+            
+            // Funciones de exportación
+            function exportarDatosExcel() {
+                // Implementación de exportación a Excel
+                mostrarMensaje("Exportación a Excel no implementada", "warning");
+            }
+            
+            function exportarDatosPDF() {
+                // Implementación de exportación a PDF
+                mostrarMensaje("Exportación a PDF no implementada", "warning");
+            }
+            
+            // Notificaciones
+            function enviarNotificacionesRenovacion() {
+                // Implementación de envío de notificaciones
+                mostrarMensaje("Notificaciones enviadas correctamente", "success");
+            }
+            
+            // Notas
+            function guardarNotaGeneral() {
+                const nota = document.getElementById("notaGeneral").value;
+                localStorage.setItem("notaGeneral", nota);
+                mostrarMensaje("Nota guardada correctamente", "success");
+            }
+            
+            // Utilidades
+            function formatearFecha(fechaISO) {
+                const fecha = new Date(fechaISO);
+                return fecha.toLocaleDateString('es-ES', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+            
+            function mostrarMensaje(mensaje, tipo) {
+                alert(mensaje);
+                // Aquí se podría implementar un sistema de notificaciones más elegante
+            }
+            
+            // Funciones globales para editar/eliminar clientes
+            window.editarCliente = function(index) {
+                // Implementación de edición de cliente
+                mostrarMensaje("Función de edición no implementada", "warning");
+            };
+            
+            window.eliminarCliente = function(index) {
+                if (confirm("¿Está seguro que desea eliminar este cliente?")) {
+                    clientes.splice(index, 1);
+                    guardarDatos();
+                    actualizarListaClientes();
+                    agregarHistorial("Cliente eliminado");
+                    mostrarMensaje("Cliente eliminado correctamente", "success");
+                }
+            };
         });
     </script>
 </body>
