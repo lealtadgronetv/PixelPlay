@@ -1,1370 +1,167 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Cuentas Streaming</title>
-    <!-- Importación de Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        .actions button { margin-right: 5px; }
-        .form-group { margin-bottom: 10px; }
-        .form-group label { display: block; margin-bottom: 5px; }
-        button { padding: 8px 16px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-        button:hover { background-color: #45a049; }
-        .delete-btn { background-color: #f44336; }
-        .delete-btn:hover { background-color: #d32f2f; }
-        .status-pending { color: orange; }
-        .status-paid { color: green; }
-        .status-failed { color: red; font-weight: bold; }
-        #notification { 
-            padding: 15px; 
-            margin-bottom: 20px; 
-            display: none; 
-            background-color: #d4edda; 
-            color: #155724; 
-            border-radius: 4px; 
-        }
-        .area-select {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        .area-btn {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            background-color: #f0f0f0;
-            cursor: pointer;
-            border: 1px solid #ddd;
-        }
-        .area-btn.active {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .area-content {
-            display: none;
-        }
-        .visible {
-            display: block;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 600px;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close:hover {
-            color: black;
-        }
-        .tab {
-            overflow: hidden;
-            border: 1px solid #ccc;
-            background-color: #f1f1f1;
-            margin-bottom: 15px;
-        }
-        .tab button {
-            background-color: inherit;
-            float: left;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            padding: 14px 16px;
-            transition: 0.3s;
-            color: black;
-        }
-        .tab button:hover {
-            background-color: #ddd;
-        }
-        .tab button.active {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .tabcontent {
-            display: none;
-            padding: 6px 12px;
-            border: 1px solid #ccc;
-            border-top: none;
-        }
-        .badge {
-            display: inline-block;
-            padding: 3px 7px;
-            border-radius: 50%;
-            background-color: red;
-            color: white;
-            font-size: 12px;
-        }
-        /* Estilos para destacar los botones de las nuevas funcionalidades */
-.btn-soporte {
-    background-color: #3498db;
-}
-.btn-soporte:hover {
-    background-color: #2980b9;
-}
-.nueva-funcion {
-    margin-top: 5px;
-    width: 100%;
-}
-.perfil-asignado {
-    font-style: italic;
-    color: #666;
-    margin-top: 5px;
-}
-    </style>
+    <title>Gestión de Cuentas de Streaming</title>
+    <!-- Importando correctamente Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+    <h1>Panel de Gestión de Cuentas</h1>
+    <button onclick="ingresarCuentaCompleta()">Ingresar Cuenta Completa</button>
+    <button onclick="ingresarCuentaPerfil()">Ingresar Perfil</button>
+    <button onclick="marcarPagada()">Marcar como Pagada</button>
+    <button onclick="marcarVencida()">Marcar como Vencida</button>
+    <button onclick="agregarDias()">Agregar Días</button>
+    <button onclick="verCuentasDisponibles()">Ver Cuentas Disponibles</button>
+    <button onclick="verPerfilesDisponibles()">Ver Perfiles Disponibles</button>
+    <button onclick="liberarPerfiles()">Liberar Perfiles Vencidos</button>
+    <button onclick="notificarSoporte()">Notificar Soporte</button>
+    <button onclick="verTotalCuentas()">Ver Total de Cuentas</button>
+    <button onclick="verTotalPerfiles()">Ver Total de Perfiles</button>
 
-    <h1>Gestión de Cuentas Streaming</h1>
-    
-    <div id="notification"></div>
+    <script>
+    // 🔹 Configuración de Supabase
+    const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co";  // Reemplázalo con tu URL
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA"; // Reemplázalo con tu clave API
+    const supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    <!-- Menú de selección de área -->
-    <div class="area-select">
-        <div class="area-btn active" onclick="cambiarArea('ventas')" id="btn-ventas">Área de Ventas</div>
-        <div class="area-btn" onclick="cambiarArea('soporte')" id="btn-soporte">Área de Soporte <span id="soporte-badge" class="badge" style="display: none;">0</span></div>
-    </div>
+    // 🔹 Ingresar una cuenta completa a Supabase
+    async function ingresarCuentaCompleta() {
+        let correo = prompt("Ingrese el correo de la nueva cuenta:");
+        if (!correo) return alert("Correo inválido.");
 
-    <!-- Área de Ventas -->
-    <div id="area-ventas" class="area-content visible">
-        <div class="tab">
-            <button class="tablinks active" onclick="openTab(event, 'agregar-cuenta')">Agregar Cuenta</button>
-            <button class="tablinks" onclick="openTab(event, 'lista-cuentas')">Lista de Cuentas</button>
-            <button class="tablinks" onclick="openTab(event, 'asignar-cuenta')">Asignar Cuenta</button>
-        </div>
+        let { data, error } = await supabase.from("netflix").insert([
+            { correo, perfiles_disponibles: 5, estado: "activa" }
+        ]);
 
-        <!-- Agregar cuenta -->
-        <div id="agregar-cuenta" class="tabcontent" style="display: block;">
-            <h3>Agregar Nueva Cuenta</h3>
-            <div class="form-group">
-                <label for="correo">Correo:</label>
-                <input type="email" id="correo" placeholder="Correo">
-            </div>
-            <div class="form-group">
-                <label for="contraseña">Contraseña:</label>
-                <input type="text" id="contraseña" placeholder="Contraseña">
-            </div>
-            <div class="form-group">
-                <label for="plataforma">Plataforma:</label>
-                <input type="text" id="plataforma" placeholder="Netflix, Disney+, etc.">
-            </div>
-            <div class="form-group">
-                <label for="perfiles">Perfiles disponibles:</label>
-                <input type="number" id="perfiles" placeholder="Número de perfiles" min="1">
-            </div>
-            <div class="form-group">
-                <label for="fecha_vencimiento">Fecha de vencimiento:</label>
-                <input type="date" id="fecha_vencimiento">
-            </div>
-            <div class="form-group">
-                <label for="estado_pago">Estado de pago:</label>
-                <select id="estado_pago">
-                    <option value="pendiente">Pendiente</option>
-                    <option value="pagado">Pagado</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="whatsapp_cliente">WhatsApp Cliente:</label>
-                <input type="text" id="whatsapp_cliente" placeholder="Número de WhatsApp">
-            </div>
-            <button onclick="agregarCuenta()">Agregar Cuenta</button>
-        </div>
-
-        <!-- Lista de cuentas -->
-        <div id="lista-cuentas" class="tabcontent">
-            <h3>Lista de Cuentas</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Correo</th>
-                        <th>Contraseña</th>
-                        <th>Plataforma</th>
-                        <th>Perfiles</th>
-                        <th>Disponibles</th>
-                        <th>Vencimiento</th>
-                        <th>Pago</th>
-                        <th>Estado</th>
-                        <th>Cliente</th>
-                        <th>WhatsApp</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="cuentas-list"></tbody>
-            </table>
-        </div>
-
-        <!-- Asignar cuenta -->
-        <div id="asignar-cuenta" class="tabcontent">
-            <h3>Asignar Cuenta a Cliente</h3>
-            <div class="form-group">
-                <label for="cuenta-id">ID de Cuenta:</label>
-                <input type="number" id="cuenta-id" placeholder="ID de la cuenta">
-                <button onclick="buscarCuenta()">Buscar</button>
-            </div>
-            <div id="cuenta-detalles" style="display: none;">
-                <h4>Detalles de la Cuenta</h4>
-                <p><strong>Correo:</strong> <span id="detalle-correo"></span></p>
-                <p><strong>Plataforma:</strong> <span id="detalle-plataforma"></span></p>
-                <p><strong>Perfiles disponibles:</strong> <span id="detalle-perfiles"></span></p>
-                
-                <div class="form-group">
-                    <label for="nombre-cliente">Nombre del Cliente:</label>
-                    <input type="text" id="nombre-cliente" placeholder="Nombre completo">
-                </div>
-                <div class="form-group">
-                    <label for="whatsapp-cliente">WhatsApp del Cliente:</label>
-                    <input type="text" id="whatsapp-cliente" placeholder="Incluir código de país">
-                </div>
-                <div class="form-group">
-                    <label for="perfiles-asignados">Perfiles a asignar:</label>
-                    <input type="number" id="perfiles-asignados" min="1" value="1">
-                </div>
-                <button onclick="asignarCuenta()">Asignar Cuenta</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Área de Soporte -->
-    <div id="area-soporte" class="area-content">
-        <h3>Gestión de Soporte</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Correo</th>
-                    <th>Plataforma</th>
-                    <th>Cliente</th>
-                    <th>WhatsApp</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="soporte-list"></tbody>
-        </table>
-    </div>
-<!-- Modal para asignar días adicionales -->
-<div id="modal-dias" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="cerrarModal('modal-dias')">&times;</span>
-        <h3>Asignar Días Adicionales</h3>
-        <input type="hidden" id="dias-id">
-        <p>Cuenta: <span id="dias-cuenta"></span></p>
-        <p>Vencimiento actual: <span id="dias-vencimiento"></span></p>
-        <div class="form-group">
-            <label for="dias-cantidad">Días a añadir:</label>
-            <input type="number" id="dias-cantidad" min="1" value="30">
-        </div>
-        <div class="form-group">
-            <label for="dias-motivo">Motivo:</label>
-            <input type="text" id="dias-motivo" placeholder="Ej: Compensación por caída">
-        </div>
-        <button onclick="asignarDiasAdicionales()">Asignar Días</button>
-    </div>
-</div>
-
-<!-- Modal para cambiar perfil de usuario -->
-<div id="modal-perfil" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="cerrarModal('modal-perfil')">&times;</span>
-        <h3>Cambiar Perfil de Usuario</h3>
-        <input type="hidden" id="perfil-id">
-        <p>Cuenta: <span id="perfil-cuenta"></span></p>
-        <p>Cliente: <span id="perfil-cliente"></span></p>
-        <div class="form-group">
-            <label for="perfil-nombre">Nombre del perfil:</label>
-            <input type="text" id="perfil-nombre" placeholder="Nombre del perfil a usar">
-        </div>
-        <div class="form-group">
-            <label for="perfil-pin">PIN (opcional):</label>
-            <input type="text" id="perfil-pin" placeholder="PIN si es necesario">
-        </div>
-        <button onclick="cambiarPerfil()">Guardar Cambios</button>
-    </div>
-</div>
-    
-    <!-- Modal para editar cuenta -->
-    <div id="modal-editar" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="cerrarModal('modal-editar')">&times;</span>
-            <h3>Editar Cuenta</h3>
-            <input type="hidden" id="editar-id">
-            <div class="form-group">
-                <label for="editar-correo">Correo:</label>
-                <input type="email" id="editar-correo">
-            </div>
-            <div class="form-group">
-                <label for="editar-contraseña">Contraseña:</label>
-                <input type="text" id="editar-contraseña">
-            </div>
-            <div class="form-group">
-                <label for="editar-plataforma">Plataforma:</label>
-                <input type="text" id="editar-plataforma">
-            </div>
-            <div class="form-group">
-                <label for="editar-perfiles">Perfiles totales:</label>
-                <input type="number" id="editar-perfiles" min="1">
-            </div>
-            <div class="form-group">
-                <label for="editar-disponibles">Perfiles disponibles:</label>
-                <input type="number" id="editar-disponibles" min="0">
-            </div>
-            <div class="form-group">
-                <label for="editar-vencimiento">Fecha de vencimiento:</label>
-                <input type="date" id="editar-vencimiento">
-            </div>
-            <div class="form-group">
-                <label for="editar-pago">Estado de pago:</label>
-                <select id="editar-pago">
-                    <option value="pendiente">Pendiente</option>
-                    <option value="pagado">Pagado</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="editar-estado">Estado de la cuenta:</label>
-                <select id="editar-estado">
-                    <option value="activa">Activa</option>
-                    <option value="caida">Caída</option>
-                </select>
-            </div>
-            <button onclick="guardarEdicion()">Guardar Cambios</button>
-        </div>
-    </div>
-
-    <!-- Modal para reportar caída -->
-    <div id="modal-reporte" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="cerrarModal('modal-reporte')">&times;</span>
-            <h3>Reportar Cuenta Caída</h3>
-            <input type="hidden" id="reporte-id">
-            <div class="form-group">
-                <label for="reporte-detalle">Detalles del problema:</label>
-                <textarea id="reporte-detalle" rows="4" placeholder="Describa el problema"></textarea>
-            </div>
-            <button onclick="reportarCaidaCuenta()">Enviar Reporte</button>
-        </div>
-    </div>
-
-    <!-- Modal para liberar perfiles -->
-    <div id="modal-liberar" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="cerrarModal('modal-liberar')">&times;</span>
-            <h3>Liberar Perfiles</h3>
-            <input type="hidden" id="liberar-id">
-            <p>Cuenta: <span id="liberar-cuenta"></span></p>
-            <p>Perfiles en uso: <span id="liberar-en-uso"></span></p>
-            <p>Perfiles disponibles: <span id="liberar-disponibles"></span></p>
-            <div class="form-group">
-                <label for="liberar-cantidad">Cantidad de perfiles a liberar:</label>
-                <input type="number" id="liberar-cantidad" min="1" value="1">
-            </div>
-            <div class="form-group">
-                <label for="liberar-cliente">Cliente que libera:</label>
-                <input type="text" id="liberar-cliente" placeholder="Nombre del cliente">
-            </div>
-            <button onclick="liberarPerfiles()">Liberar Perfiles</button>
-        </div>
-    </div>
-
-    <!-- Modal para generar mensaje -->
-    <div id="modal-mensaje" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="cerrarModal('modal-mensaje')">&times;</span>
-            <h3>Generar Mensaje</h3>
-            <input type="hidden" id="mensaje-id">
-            <div class="form-group">
-                <label for="mensaje-whatsapp">WhatsApp del cliente:</label>
-                <input type="text" id="mensaje-whatsapp" readonly>
-            </div>
-            <div class="form-group">
-    <label for="mensaje-texto">Mensaje:</label>
-    <textarea id="mensaje-texto" rows="6" readonly></textarea>
-</div>
-<button onclick="enviarWhatsApp()">Enviar vía WhatsApp</button>
-<button onclick="copiarMensaje()">Copiar Mensaje</button>
-</div>
-</div>
-
-<script>
-    // Configura tus credenciales de Supabase
-    const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
-
-    // Inicialización del cliente Supabase
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    // Variables globales
-    let currentArea = 'ventas';
-    let cuentasCaidas = 0;
-
-    // Función para mostrar notificaciones
-    function showNotification(message, isError = false) {
-        const notification = document.getElementById("notification");
-        notification.textContent = message;
-        notification.style.display = "block";
-        notification.style.backgroundColor = isError ? "#f8d7da" : "#d4edda";
-        notification.style.color = isError ? "#721c24" : "#155724";
-        
-        setTimeout(() => {
-            notification.style.display = "none";
-        }, 3000);
-    }
-
-    // Función para cambiar entre áreas
-    function cambiarArea(area) {
-        currentArea = area;
-        
-        // Actualizar botones
-        document.getElementById('btn-ventas').classList.remove('active');
-        document.getElementById('btn-soporte').classList.remove('active');
-        document.getElementById('btn-' + area).classList.add('active');
-        
-        // Mostrar el área seleccionada
-        document.getElementById('area-ventas').classList.remove('visible');
-        document.getElementById('area-soporte').classList.remove('visible');
-        document.getElementById('area-' + area).classList.add('visible');
-        
-        // Cargar datos del área
-        if (area === 'ventas') {
-            cargarCuentas();
+        if (error) {
+            alert("Error al ingresar la cuenta.");
+            console.error(error);
         } else {
-            cargarCuentasSoporte();
+            alert("Cuenta agregada correctamente.");
         }
     }
 
-    // Funciones para las pestañas
-    function openTab(evt, tabName) {
-        var i, tabcontent, tablinks;
-        
-        tabcontent = document.getElementsByClassName("tabcontent");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none";
-        }
-        
-        tablinks = document.getElementsByClassName("tablinks");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
-        }
-        
-        document.getElementById(tabName).style.display = "block";
-        evt.currentTarget.className += " active";
-    }
+    // 🔹 Ingresar cuenta por perfil
+    async function ingresarCuentaPerfil() {
+        let cuentaID = prompt("Ingrese el ID de la cuenta:");
+        if (!cuentaID) return alert("ID inválido.");
 
-    // Función para abrir modales
-    function abrirModal(modalId) {
-        document.getElementById(modalId).style.display = "block";
-    }
+        let { data, error } = await supabase.from("netflix").select("*").eq("id", cuentaID).single();
+        if (error || !data) return alert("Cuenta no encontrada.");
 
-    // Función para cerrar modales
-    function cerrarModal(modalId) {
-        document.getElementById(modalId).style.display = "none";
-    }
+        if (data.perfiles_disponibles > 0) {
+            let { error: updateError } = await supabase
+                .from("netflix")
+                .update({ perfiles_disponibles: data.perfiles_disponibles - 1 })
+                .eq("id", cuentaID);
 
-    // Cuando se hace clic fuera del modal, cerrarlo
-    window.onclick = function(event) {
-        if (event.target.className === 'modal') {
-            event.target.style.display = "none";
-        }
-    }
-
-    // Cargar cuentas para el área de ventas
-    async function cargarCuentas() {
-        try {
-            const { data, error } = await supabase.from("netflix").select("*");
-            
-            if (error) {
-                throw error;
-            }
-
-            const tbody = document.getElementById("cuentas-list");
-            tbody.innerHTML = "";
-            
-            if (data && data.length > 0) {
-                data.forEach(cuenta => {
-                    // Para cada cuenta, verificar si tiene cliente_asignado
-                    const clienteInfo = cuenta.cliente_asignado ? `${cuenta.cliente_asignado}` : "No asignado";
-                    const perfilesDisponibles = cuenta.perfiles_disponibles !== undefined ? cuenta.perfiles_disponibles : cuenta.perfiles;
-                    const estadoCuenta = cuenta.estado === 'caida' ? 
-                        '<span class="status-failed">Caída</span>' : 
-                        '<span class="status-paid">Activa</span>';
-                    
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${cuenta.id}</td>
-                        <td>${cuenta.correo}</td>
-                        <td>${cuenta.contraseña || "N/A"}</td>
-                        <td>${cuenta.plataforma || "N/A"}</td>
-                        <td>${cuenta.perfiles || "N/A"}</td>
-                        <td>${perfilesDisponibles || "N/A"}</td>
-                        <td>${cuenta.fecha_vencimiento ? new Date(cuenta.fecha_vencimiento).toLocaleDateString() : "N/A"}</td>
-                        <td class="${cuenta.estado_pago === 'pagado' ? 'status-paid' : 'status-pending'}">${cuenta.estado_pago}</td>
-                        <td>${estadoCuenta}</td>
-                        <td>${clienteInfo}</td>
-                        <td>${cuenta.whatsapp_cliente || "N/A"}</td>
-                        <td class="actions">
-                            <button onclick="editarCuenta(${cuenta.id})">Editar</button>
-                            <button class="delete-btn" onclick="eliminarCuenta(${cuenta.id})">Eliminar</button>
-                            <button onclick="abrirModalLiberar(${cuenta.id})">Liberar</button>
-                            <button onclick="generarMensaje(${cuenta.id})">Mensaje</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
+            if (updateError) {
+                alert("Error al asignar perfil.");
+                console.error(updateError);
             } else {
-                const row = document.createElement("tr");
-                row.innerHTML = '<td colspan="12" style="text-align: center;">No hay cuentas registradas</td>';
-                tbody.appendChild(row);
+                alert("Perfil asignado correctamente.");
             }
-        } catch (error) {
-            console.error("Error al cargar cuentas:", error);
-            showNotification("Error al cargar las cuentas: " + error.message, true);
-        }
-    }
-
-    // Cargar cuentas para el área de soporte
-    async function cargarCuentasSoporte() {
-        try {
-            const { data, error } = await supabase.from("netflix")
-                .select("*")
-                .not('cliente_asignado', 'is', null);
-            
-            if (error) {
-                throw error;
-            }
-
-            const tbody = document.getElementById("soporte-list");
-            tbody.innerHTML = "";
-            
-            // Resetear contador de cuentas caídas
-            cuentasCaidas = 0;
-            
-            if (data && data.length > 0) {
-                data.forEach(cuenta => {
-                    // Contar cuentas caídas
-                    if (cuenta.estado === 'caida') {
-                        cuentasCaidas++;
-                    }
-                    
-                    const estadoCuenta = cuenta.estado === 'caida' ? 
-                        '<span class="status-failed">Caída</span>' : 
-                        '<span class="status-paid">Activa</span>';
-                    
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${cuenta.id}</td>
-                        <td>${cuenta.correo}</td>
-                        <td>${cuenta.plataforma || "N/A"}</td>
-                        <td>${cuenta.cliente_asignado || "No asignado"}</td>
-                        <td>${cuenta.whatsapp_cliente || "N/A"}</td>
-                        <td>${estadoCuenta}</td>
-                        <td class="actions">
-                            <button onclick="reportarCaida(${cuenta.id})">Reportar Caída</button>
-                            <button onclick="verDetalles(${cuenta.id})">Ver Detalles</button>
-                            <button onclick="generarMensaje(${cuenta.id})">Enviar Mensaje</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } else {
-                const row = document.createElement("tr");
-                row.innerHTML = '<td colspan="7" style="text-align: center;">No hay cuentas asignadas</td>';
-                tbody.appendChild(row);
-            }
-            
-            // Actualizar contador en el badge
-            actualizarBadgeSoporte();
-        } catch (error) {
-            console.error("Error al cargar cuentas de soporte:", error);
-            showNotification("Error al cargar cuentas: " + error.message, true);
-        }
-    }
-
-    // Actualizar el badge de cuentas caídas
-    function actualizarBadgeSoporte() {
-        const badge = document.getElementById('soporte-badge');
-        if (cuentasCaidas > 0) {
-            badge.textContent = cuentasCaidas;
-            badge.style.display = 'inline-block';
         } else {
-            badge.style.display = 'none';
+            alert("No hay perfiles disponibles.");
         }
     }
 
-    // Función para agregar una nueva cuenta
-    async function agregarCuenta() {
-        try {
-            const correo = document.getElementById("correo").value;
-            const contraseña = document.getElementById("contraseña").value;
-            const plataforma = document.getElementById("plataforma").value;
-            const perfiles = document.getElementById("perfiles").value;
-            const fecha_vencimiento = document.getElementById("fecha_vencimiento").value;
-            const estado_pago = document.getElementById("estado_pago").value;
-            const whatsapp_cliente = document.getElementById("whatsapp_cliente").value;
+    // 🔹 Marcar cuenta como pagada
+    async function marcarPagada() {
+        let cuentaID = prompt("Ingrese el ID de la cuenta:");
+        let { error } = await supabase.from("netflix").update({ estado_pago: "pagado" }).eq("id", cuentaID);
+        error ? alert("Error al actualizar.") : alert("Cuenta marcada como pagada.");
+    }
 
-            if (!correo || !plataforma || !perfiles || !fecha_vencimiento) {
-                showNotification("Los campos de correo, plataforma, perfiles y vencimiento son obligatorios.", true);
-                return;
-            }
+    // 🔹 Marcar cuenta como vencida
+    async function marcarVencida() {
+        let cuentaID = prompt("Ingrese el ID de la cuenta:");
+        let { error } = await supabase.from("netflix").update({ estado: "vencida" }).eq("id", cuentaID);
+        error ? alert("Error al actualizar.") : alert("Cuenta marcada como vencida.");
+    }
 
-            const { data, error } = await supabase.from("netflix").insert([
-                { 
-                    correo, 
-                    contraseña, 
-                    plataforma, 
-                    perfiles: parseInt(perfiles),
-                    perfiles_disponibles: parseInt(perfiles), 
-                    fecha_vencimiento, 
-                    estado_pago,
-                    estado: 'activa',
-                    whatsapp_cliente 
-                }
-            ]).select();
+    // 🔹 Agregar días adicionales
+    async function agregarDias() {
+        let cuentaID = prompt("Ingrese el ID de la cuenta:");
+        let dias = parseInt(prompt("Ingrese los días adicionales:"), 10);
+        if (isNaN(dias) || dias <= 0) return alert("Días inválidos.");
 
-            if (error) {
-                throw error;
-            }
+        let { data, error } = await supabase.from("netflix").select("dias_reposicion").eq("id", cuentaID).single();
+        if (error || !data) return alert("Cuenta no encontrada.");
 
-            showNotification("Cuenta agregada correctamente");
-            limpiarFormulario();
-            cargarCuentas();
-        } catch (error) {
-            console.error("Error al agregar cuenta:", error);
-            showNotification("Error al agregar la cuenta: " + error.message, true);
+        let { error: updateError } = await supabase
+            .from("netflix")
+            .update({ dias_reposicion: data.dias_reposicion + dias })
+            .eq("id", cuentaID);
+
+        updateError ? alert("Error al actualizar.") : alert(`Se agregaron ${dias} días.`);
+    }
+
+    // 🔹 Ver cuentas activas disponibles
+    async function verCuentasDisponibles() {
+        let { data, error } = await supabase.from("netflix").select("*").eq("estado", "activa");
+        if (error) {
+            alert("Error al obtener datos.");
+        } else {
+            alert(`Hay ${data.length} cuentas activas disponibles.`);
         }
     }
 
-    // Función para buscar una cuenta para asignar
-    async function buscarCuenta() {
-        try {
-            const cuentaId = document.getElementById("cuenta-id").value;
-            
-            if (!cuentaId) {
-                showNotification("Por favor, ingrese un ID de cuenta válido", true);
-                return;
-            }
-            
-            const { data, error } = await supabase.from("netflix")
-                .select("*")
-                .eq("id", cuentaId)
-                .single();
-            
-            if (error) {
-                throw error;
-            }
-            
-            if (!data) {
-                showNotification("Cuenta no encontrada", true);
-                return;
-            }
-            
-            // Verificar si hay perfiles disponibles
-            const perfilesDisponibles = data.perfiles_disponibles !== undefined ? data.perfiles_disponibles : data.perfiles;
-            
-            if (perfilesDisponibles <= 0) {
-                showNotification("Esta cuenta no tiene perfiles disponibles para asignar", true);
-                return;
-            }
-            
-            // Mostrar detalles de la cuenta
-            document.getElementById("detalle-correo").textContent = data.correo;
-            document.getElementById("detalle-plataforma").textContent = data.plataforma;
-            document.getElementById("detalle-perfiles").textContent = perfilesDisponibles;
-            document.getElementById("perfiles-asignados").max = perfilesDisponibles;
-            document.getElementById("cuenta-detalles").style.display = "block";
-            
-        } catch (error) {
-            console.error("Error al buscar cuenta:", error);
-            showNotification("Error: " + error.message, true);
+    // 🔹 Ver perfiles disponibles
+    async function verPerfilesDisponibles() {
+        let { data, error } = await supabase.from("netflix").select("perfiles_disponibles");
+        if (error) {
+            alert("Error al obtener datos.");
+        } else {
+            let totalPerfiles = data.reduce((sum, cuenta) => sum + cuenta.perfiles_disponibles, 0);
+            alert(`Hay ${totalPerfiles} perfiles disponibles.`);
         }
     }
 
-    // Función para asignar una cuenta a un cliente
-    async function asignarCuenta() {
-        try {
-            const cuentaId = document.getElementById("cuenta-id").value;
-            const nombreCliente = document.getElementById("nombre-cliente").value;
-            const whatsappCliente = document.getElementById("whatsapp-cliente").value;
-            const perfilesAsignados = parseInt(document.getElementById("perfiles-asignados").value);
-            
-            if (!nombreCliente || !whatsappCliente || !perfilesAsignados) {
-                showNotification("Todos los campos son obligatorios", true);
-                return;
-            }
-            
-            // Obtener la cuenta actual
-            const { data: cuentaActual, error: errorCuenta } = await supabase.from("netflix")
-                .select("*")
-                .eq("id", cuentaId)
-                .single();
-                
-            if (errorCuenta) {
-                throw errorCuenta;
-            }
-            
-            // Calcular nuevos perfiles disponibles
-            const perfilesDisponibles = (cuentaActual.perfiles_disponibles !== undefined ? 
-                cuentaActual.perfiles_disponibles : cuentaActual.perfiles) - perfilesAsignados;
-                
-            if (perfilesDisponibles < 0) {
-                showNotification("No hay suficientes perfiles disponibles", true);
-                return;
-            }
-            
-            // Actualizar la cuenta
-            const { error: errorUpdate } = await supabase.from("netflix")
-                .update({ 
-                    cliente_asignado: nombreCliente,
-                    whatsapp_cliente: whatsappCliente,
-                    perfiles_disponibles: perfilesDisponibles
-                })
-                .eq("id", cuentaId);
-                
-            if (errorUpdate) {
-                throw errorUpdate;
-            }
-            
-            showNotification("Cuenta asignada correctamente");
-            document.getElementById("cuenta-detalles").style.display = "none";
-            document.getElementById("cuenta-id").value = "";
-            document.getElementById("nombre-cliente").value = "";
-            document.getElementById("whatsapp-cliente").value = "";
-            cargarCuentas();
-            
-            // Generar mensaje automático
-            generarMensaje(cuentaId);
-            
-        } catch (error) {
-            console.error("Error al asignar cuenta:", error);
-            showNotification("Error: " + error.message, true);
-        }
-    }
-
-    // Función para eliminar una cuenta
-    async function eliminarCuenta(id) {
-        try {
-            if (!confirm("¿Estás seguro de que deseas eliminar esta cuenta?")) {
-                return;
-            }
-            
-            const { error } = await supabase.from("netflix").delete().eq("id", id);
-            
-            if (error) {
-                throw error;
-            }
-            
-            showNotification("Cuenta eliminada correctamente");
-            cargarCuentas();
-        } catch (error) {
-            console.error("Error al eliminar cuenta:", error);
-            showNotification("Error al eliminar la cuenta: " + error.message, true);
-        }
-    }
-
-    // Función para abrir el modal de edición de cuenta
-    async function editarCuenta(id) {
-        try {
-            const { data, error } = await supabase.from("netflix")
-                .select("*")
-                .eq("id", id)
-                .single();
-                
-            if (error) {
-                throw error;
-            }
-            
-            // Llenar el formulario con los datos de la cuenta
-            document.getElementById("editar-id").value = data.id;
-            document.getElementById("editar-correo").value = data.correo;
-            document.getElementById("editar-contraseña").value = data.contraseña || "";
-            document.getElementById("editar-plataforma").value = data.plataforma || "";
-            document.getElementById("editar-perfiles").value = data.perfiles || "";
-            document.getElementById("editar-disponibles").value = data.perfiles_disponibles !== undefined ? data.perfiles_disponibles : data.perfiles;
-            document.getElementById("editar-vencimiento").value = data.fecha_vencimiento || "";
-            document.getElementById("editar-pago").value = data.estado_pago || "pendiente";
-            document.getElementById("editar-estado").value = data.estado || "activa";
-            
-            // Mostrar el modal
-            abrirModal('modal-editar');
-            
-        } catch (error) {
-            console.error("Error al editar cuenta:", error);
-            showNotification("Error: " + error.message, true);
-        }
-    }
-
-    // Función para guardar la edición de una cuenta
-    async function guardarEdicion() {
-        try {
-            const id = document.getElementById("editar-id").value;
-            const correo = document.getElementById("editar-correo").value;
-            const contraseña = document.getElementById("editar-contraseña").value;
-            const plataforma = document.getElementById("editar-plataforma").value;
-            const perfiles = parseInt(document.getElementById("editar-perfiles").value);
-            const disponibles = parseInt(document.getElementById("editar-disponibles").value);
-            const vencimiento = document.getElementById("editar-vencimiento").value;
-            const pago = document.getElementById("editar-pago").value;
-            const estado = document.getElementById("editar-estado").value;
-            
-            if (!correo || !plataforma || !perfiles || !vencimiento) {
-                showNotification("Los campos de correo, plataforma, perfiles y vencimiento son obligatorios", true);
-                return;
-            }
-            
-            const { error } = await supabase.from("netflix")
-                .update({
-                    correo,
-                    contraseña,
-                    plataforma,
-                    perfiles,
-                    perfiles_disponibles: disponibles,
-                    fecha_vencimiento: vencimiento,
-                    estado_pago: pago,
-                    estado
-                })
-                .eq("id", id);
-                
-            if (error) {
-                throw error;
-            }
-            
-            showNotification("Cuenta actualizada correctamente");
-            cerrarModal('modal-editar');
-            cargarCuentas();
-            
-        } catch (error) {
-            console.error("Error al guardar edición:", error);
-            showNotification("Error: " + error.message, true);
-        }
-    }
-
-    // Función para abrir el modal de reportar caída
-    function reportarCaida(id) {
-        document.getElementById("reporte-id").value = id;
-        abrirModal('modal-reporte');
-    }
-
-    // Función para reportar una cuenta caída
-    async function reportarCaidaCuenta() {
-        try {
-            const id = document.getElementById("reporte-id").value;
-            const detalle = document.getElementById("reporte-detalle").value;
-            
-            if (!detalle) {
-                showNotification("Por favor, detalle el problema", true);
-                return;
-            }
-            
-            const { error } = await supabase.from("netflix")
-                .update({ 
-                    estado: 'caida', 
-                    detalles_caida: detalle,
-                    fecha_reporte: new Date().toISOString()
-                })
-                .eq("id", id);
-                
-            if (error) {
-                throw error;
-            }
-            
-            showNotification("Cuenta reportada correctamente");
-            cerrarModal('modal-reporte');
-            cargarCuentasSoporte();
-            
-        } catch (error) {
-            console.error("Error al reportar caída:", error);
-            showNotification("Error: " + error.message, true);
-        }
-    }
-
-    // Función para abrir el modal de liberar perfiles
-    async function abrirModalLiberar(id) {
-        try {
-            const { data, error } = await supabase.from("netflix")
-                .select("*")
-                .eq("id", id)
-                .single();
-                
-            if (error) {
-                throw error;
-            }
-            
-            const perfilesDisponibles = data.perfiles_disponibles !== undefined ? data.perfiles_disponibles : data.perfiles;
-            const perfilesEnUso = data.perfiles - perfilesDisponibles;
-            
-            document.getElementById("liberar-id").value = data.id;
-            document.getElementById("liberar-cuenta").textContent = data.correo;
-            document.getElementById("liberar-en-uso").textContent = perfilesEnUso;
-            document.getElementById("liberar-disponibles").textContent = perfilesDisponibles;
-            document.getElementById("liberar-cantidad").max = perfilesEnUso;
-            
-            abrirModal('modal-liberar');
-            
-        } catch (error) {
-            console.error("Error al abrir modal de liberar:", error);
-            showNotification("Error: " + error.message, true);
-        }
-    }
-
-    // Función para liberar perfiles
+    // 🔹 Liberar perfiles vencidos
     async function liberarPerfiles() {
-        try {
-            const id = document.getElementById("liberar-id").value;
-            const cantidad = parseInt(document.getElementById("liberar-cantidad").value);
-            const cliente = document.getElementById("liberar-cliente").value;
-            
-            if (!cantidad || !cliente) {
-                showNotification("Todos los campos son obligatorios", true);
-                return;
-            }
-            
-            // Obtener la cuenta actual
-            const { data: cuentaActual, error: errorCuenta } = await supabase.from("netflix")
-                .select("*")
-                .eq("id", id)
-                .single();
-                
-            if (errorCuenta) {
-                throw errorCuenta;
-            }
-            
-            // Calcular nuevos perfiles disponibles
-            const perfilesDisponibles = (cuentaActual.perfiles_disponibles !== undefined ? 
-                cuentaActual.perfiles_disponibles : 0) + cantidad;
-                
-            // Actualizar la cuenta
-            const { error: errorUpdate } = await supabase.from("netflix")
-                .update({ 
-                    perfiles_disponibles: perfilesDisponibles,
-                    ultima_liberacion: new Date().toISOString(),
-                    cliente_liberacion: cliente
-                })
-                .eq("id", id);
-                
-            if (errorUpdate) {
-                throw errorUpdate;
-            }
-            
-            showNotification("Perfiles liberados correctamente");
-            cerrarModal('modal-liberar');
-            cargarCuentas();
-            
-        } catch (error) {
-            console.error("Error al liberar perfiles:", error);
-            showNotification("Error: " + error.message, true);
-        }
+        let { error } = await supabase
+            .from("netflix")
+            .update({ perfiles_disponibles: 5 })
+            .eq("estado", "vencida");
+
+        error ? alert("Error al liberar perfiles.") : alert("Perfiles liberados correctamente.");
     }
 
-    // Función para ver detalles de una cuenta
-    async function verDetalles(id) {
-        try {
-            const { data, error } = await supabase.from("netflix")
-                .select("*")
-                .eq("id", id)
-                .single();
-                
-            if (error) {
-                throw error;
-            }
-            
-            // Llenar el formulario con los datos de la cuenta
-            document.getElementById("editar-id").value = data.id;
-            document.getElementById("editar-correo").value = data.correo;
-            document.getElementById("editar-contraseña").value = data.contraseña || "";
-            document.getElementById("editar-plataforma").value = data.plataforma || "";
-            document.getElementById("editar-perfiles").value = data.perfiles || "";
-            document.getElementById("editar-disponibles").value = data.perfiles_disponibles !== undefined ? data.perfiles_disponibles : data.perfiles;
-            document.getElementById("editar-vencimiento").value = data.fecha_vencimiento || "";
-            document.getElementById("editar-pago").value = data.estado_pago || "pendiente";
-            document.getElementById("editar-estado").value = data.estado || "activa";
-            
-            // Bloquear campos para solo lectura
-            document.getElementById("editar-correo").readOnly = true;
-            document.getElementById("editar-contraseña").readOnly = true;
-            document.getElementById("editar-plataforma").readOnly = true;
-            document.getElementById("editar-perfiles").readOnly = true;
-            document.getElementById("editar-disponibles").readOnly = true;
-            document.getElementById("editar-vencimiento").readOnly = true;
-            document.getElementById("editar-pago").disabled = true;
-            document.getElementById("editar-estado").disabled = true;
-            
-            // Mostrar el modal
-            abrirModal('modal-editar');
-            
-        } catch (error) {
-            console.error("Error al ver detalles:", error);
-            showNotification("Error: " + error.message, true);
-        }
+    // 🔹 Notificar soporte de cuenta caída
+    async function notificarSoporte() {
+        let cuentaID = prompt("Ingrese el ID de la cuenta caída:");
+        let motivo = prompt("Ingrese el motivo de la caída:");
+        if (!motivo) return alert("Debe ingresar un motivo.");
+
+        let { error } = await supabase.from("netflix").update({ detalles_caida: motivo }).eq("id", cuentaID);
+        error ? alert("Error al notificar soporte.") : alert("Soporte notificado.");
     }
 
-    // Función para generar mensaje automático
-    async function generarMensaje(id) {
-        try {
-            const { data, error } = await supabase.from("netflix")
-                .select("*")
-                .eq("id", id)
-                .single();
-                
-            if (error) {
-                throw error;
-            }
-            
-            // Verificar si hay WhatsApp del cliente
-            if (!data.whatsapp_cliente) {
-                showNotification("Esta cuenta no tiene WhatsApp asociado", true);
-                return;
-            }
-            
-            // Generar mensaje automático
-            const mensaje = `¡Hola ${data.cliente_asignado || "cliente"}!
-
-Detalles de tu cuenta de ${data.plataforma}:
-✉️ Correo: ${data.correo}
-🔑 Contraseña: ${data.contraseña}
-📅 Vencimiento: ${new Date(data.fecha_vencimiento).toLocaleDateString()}
-
-Si tienes algún problema con tu cuenta, no dudes en contactarnos.
-¡Gracias por confiar en nosotros!`;
-            
-            // Llenar el modal
-            document.getElementById("mensaje-id").value = data.id;
-            document.getElementById("mensaje-whatsapp").value = data.whatsapp_cliente;
-            document.getElementById("mensaje-texto").value = mensaje;
-            
-            // Mostrar el modal
-            abrirModal('modal-mensaje');
-            
-        } catch (error) {
-            console.error("Error al generar mensaje:", error);
-            showNotification("Error: " + error.message, true);
-        }
-    }
-
-    // Función para enviar mensaje por WhatsApp
-    function enviarWhatsApp() {
-        const whatsapp = document.getElementById("mensaje-whatsapp").value;
-        const mensaje = encodeURIComponent(document.getElementById("mensaje-texto").value);
-        
-        // Crear URL para WhatsApp
-        const url = `https://wa.me/${whatsapp}?text=${mensaje}`;
-        
-        // Abrir en nueva pestaña
-        window.open(url, '_blank');
-    }
-
-    // Función para copiar mensaje al portapapeles
-    function copiarMensaje() {
-        const mensaje = document.getElementById("mensaje-texto");
-        mensaje.select();
-        document.execCommand("copy");
-        showNotification("Mensaje copiado al portapapeles");
-    }
-
-    // Función para limpiar formulario
-    function limpiarFormulario() {
-        document.getElementById("correo").value = "";
-        document.getElementById("contraseña").value = "";
-        document.getElementById("plataforma").value = "";
-        document.getElementById("perfiles").value = "";
-        document.getElementById("fecha_vencimiento").value = "";
-        document.getElementById("estado_pago").value = "pendiente";
-        document.getElementById("whatsapp_cliente").value = "";
-    }
-
-    // Verificar la conexión con Supabase al cargar la página
-    document.addEventListener("DOMContentLoaded", async () => {
-        try {
-            // Intenta hacer una consulta simple para verificar la conexión
-            const { error } = await supabase.from("netflix").select("id").limit(1);
-            
-            if (error && error.code === "PGRST116") {
-                // PGRST116 significa que la tabla no existe, lo cual está bien
-                showNotification("Conectado a Supabase pero la tabla 'netflix' no existe. Créala primero.");
-            } else if (error) {
-                throw error;
-            } else {
-                showNotification("Conexión con Supabase establecida correctamente");
-                cargarCuentas();
-            }
-        } catch (error) {
-            console.error("Error de conexión con Supabase:", error);
-            showNotification("Error de conexión con Supabase. Verifica tus credenciales en el código.", true);
-        }
-    });
-    // Función para abrir el modal de asignar días adicionales
-async function abrirModalDias(id) {
-    try {
-        const { data, error } = await supabase.from("netflix")
-            .select("*")
-            .eq("id", id)
-            .single();
-            
+    // 🔹 Ver total de cuentas registradas
+    async function verTotalCuentas() {
+        let { data, error } = await supabase.from("netflix").select("*");
         if (error) {
-            throw error;
-        }
-        
-        document.getElementById("dias-id").value = data.id;
-        document.getElementById("dias-cuenta").textContent = data.correo;
-        document.getElementById("dias-vencimiento").textContent = new Date(data.fecha_vencimiento).toLocaleDateString();
-        
-        abrirModal('modal-dias');
-        
-    } catch (error) {
-        console.error("Error al abrir modal de días:", error);
-        showNotification("Error: " + error.message, true);
-    }
-}
-
-// Función para asignar días adicionales
-async function asignarDiasAdicionales() {
-    try {
-        const id = document.getElementById("dias-id").value;
-        const diasAdicionales = parseInt(document.getElementById("dias-cantidad").value);
-        const motivo = document.getElementById("dias-motivo").value;
-        
-        if (!diasAdicionales || diasAdicionales <= 0) {
-            showNotification("La cantidad de días debe ser un número positivo", true);
-            return;
-        }
-        
-        // Obtener la cuenta actual
-        const { data: cuentaActual, error: errorCuenta } = await supabase.from("netflix")
-            .select("*")
-            .eq("id", id)
-            .single();
-            
-        if (errorCuenta) {
-            throw errorCuenta;
-        }
-        
-        // Calcular nueva fecha de vencimiento
-        const fechaActual = new Date(cuentaActual.fecha_vencimiento);
-        fechaActual.setDate(fechaActual.getDate() + diasAdicionales);
-        const nuevaFechaVencimiento = fechaActual.toISOString().split('T')[0];
-        
-        // Actualizar la fecha de vencimiento
-        const { error: errorUpdate } = await supabase.from("netflix")
-            .update({ 
-                fecha_vencimiento: nuevaFechaVencimiento,
-                historial_extensiones: cuentaActual.historial_extensiones 
-                    ? cuentaActual.historial_extensiones + `, ${new Date().toLocaleDateString()}: +${diasAdicionales} días (${motivo})`
-                    : `${new Date().toLocaleDateString()}: +${diasAdicionales} días (${motivo})`
-            })
-            .eq("id", id);
-            
-        if (errorUpdate) {
-            throw errorUpdate;
-        }
-        
-        showNotification(`Se han añadido ${diasAdicionales} días a la cuenta. Nueva fecha de vencimiento: ${new Date(nuevaFechaVencimiento).toLocaleDateString()}`);
-        cerrarModal('modal-dias');
-        
-        // Recargar la lista de cuentas según el área actual
-        if (currentArea === 'ventas') {
-            cargarCuentas();
+            alert("Error al obtener datos.");
         } else {
-            cargarCuentasSoporte();
+            alert(`Hay ${data.length} cuentas registradas.`);
         }
-        
-    } catch (error) {
-        console.error("Error al asignar días adicionales:", error);
-        showNotification("Error: " + error.message, true);
     }
-}
 
-// Función para abrir el modal de cambio de perfil
-async function abrirModalPerfil(id) {
-    try {
-        const { data, error } = await supabase.from("netflix")
-            .select("*")
-            .eq("id", id)
-            .single();
-            
+    // 🔹 Ver total de perfiles en uso
+    async function verTotalPerfiles() {
+        let { data, error } = await supabase.from("netflix").select("perfiles_disponibles");
         if (error) {
-            throw error;
-        }
-        
-        document.getElementById("perfil-id").value = data.id;
-        document.getElementById("perfil-cuenta").textContent = data.correo;
-        document.getElementById("perfil-cliente").textContent = data.cliente_asignado || "No asignado";
-        
-        // Si ya hay un perfil asignado, mostrarlo
-        if (data.perfil_asignado) {
-            document.getElementById("perfil-nombre").value = data.perfil_asignado;
-        }
-        
-        // Si ya hay un PIN asignado, mostrarlo
-        if (data.perfil_pin) {
-            document.getElementById("perfil-pin").value = data.perfil_pin;
-        }
-        
-        abrirModal('modal-perfil');
-        
-    } catch (error) {
-        console.error("Error al abrir modal de perfil:", error);
-        showNotification("Error: " + error.message, true);
-    }
-}
-
-// Función para cambiar el perfil de usuario
-async function cambiarPerfil() {
-    try {
-        const id = document.getElementById("perfil-id").value;
-        const nombrePerfil = document.getElementById("perfil-nombre").value;
-        const pinPerfil = document.getElementById("perfil-pin").value;
-        
-        if (!nombrePerfil) {
-            showNotification("Debe especificar un nombre de perfil", true);
-            return;
-        }
-        
-        // Actualizar el perfil en la base de datos
-        const { error } = await supabase.from("netflix")
-            .update({ 
-                perfil_asignado: nombrePerfil,
-                perfil_pin: pinPerfil,
-                fecha_cambio_perfil: new Date().toISOString()
-            })
-            .eq("id", id);
-            
-        if (error) {
-            throw error;
-        }
-        
-        showNotification(`Perfil actualizado correctamente: ${nombrePerfil}`);
-        cerrarModal('modal-perfil');
-        
-        // Recargar la lista de cuentas según el área actual
-        if (currentArea === 'ventas') {
-            cargarCuentas();
+            alert("Error al obtener datos.");
         } else {
-            cargarCuentasSoporte();
+            let totalUsados = data.reduce((sum, cuenta) => sum + (5 - cuenta.perfiles_disponibles), 0);
+            alert(`Se han asignado ${totalUsados} perfiles en total.`);
         }
-        
-    } catch (error) {
-        console.error("Error al cambiar perfil:", error);
-        showNotification("Error: " + error.message, true);
     }
-}
-
-// Modificar las funciones existentes para incluir los nuevos botones en las tablas
-function cargarCuentas() {
-    // Mantener la función original y añadir los nuevos botones
-    supabase.from("netflix").select("*").then(({ data, error }) => {
-        if (error) {
-            console.error("Error al cargar cuentas:", error);
-            showNotification("Error al cargar las cuentas: " + error.message, true);
-            return;
-        }
-        
-        const tbody = document.getElementById("cuentas-list");
-        tbody.innerHTML = "";
-        
-        if (data && data.length > 0) {
-            data.forEach(cuenta => {
-                // Añadir código para mostrar el perfil asignado si existe
-                const perfilInfo = cuenta.perfil_asignado ? 
-                    `<div class="perfil-asignado">Perfil: ${cuenta.perfil_asignado}${cuenta.perfil_pin ? ' (PIN: ' + cuenta.perfil_pin + ')' : ''}</div>` : 
-                    "";
-                
-                // Código existente para crear filas de la tabla
-                // ...
-                
-                // Añadir los nuevos botones al final de las acciones
-                const botonesAdicionales = `
-                    <button class="btn-soporte nueva-funcion" onclick="abrirModalDias(${cuenta.id})">Añadir Días</button>
-                    <button class="btn-soporte nueva-funcion" onclick="abrirModalPerfil(${cuenta.id})">Cambiar Perfil</button>
-                `;
-                
-                // Añadir los botones a la celda de acciones
-                const celdaAcciones = row.querySelector(".actions");
-                if (celdaAcciones) {
-                    celdaAcciones.innerHTML += botonesAdicionales;
-                }
-                
-                // Añadir información del perfil si existe
-                if (perfilInfo) {
-                    const celdaCliente = row.querySelectorAll("td")[9]; // Ajusta el índice según tu estructura
-                    if (celdaCliente) {
-                        celdaCliente.innerHTML += perfilInfo;
-                    }
-                }
-            });
-        } else {
-            const row = document.createElement("tr");
-            row.innerHTML = '<td colspan="12" style="text-align: center;">No hay cuentas registradas</td>';
-            tbody.appendChild(row);
-        }
-    });
-}
-
-function cargarCuentasSoporte() {
-    // Mantener la función original y añadir los nuevos botones
-    supabase.from("netflix")
-        .select("*")
-        .not('cliente_asignado', 'is', null)
-        .then(({ data, error }) => {
-            if (error) {
-                console.error("Error al cargar cuentas de soporte:", error);
-                showNotification("Error al cargar cuentas: " + error.message, true);
-                return;
-            }
-            
-            const tbody = document.getElementById("soporte-list");
-            tbody.innerHTML = "";
-            
-            // Resetear contador de cuentas caídas
-            cuentasCaidas = 0;
-            
-            if (data && data.length > 0) {
-                data.forEach(cuenta => {
-                    // Código existente para crear filas de la tabla
-                    // ...
-                    
-                    // Añadir los nuevos botones al final de las acciones
-                    const botonesAdicionales = `
-                        <button class="btn-soporte nueva-funcion" onclick="abrirModalDias(${cuenta.id})">Añadir Días</button>
-                        <button class="btn-soporte nueva-funcion" onclick="abrirModalPerfil(${cuenta.id})">Cambiar Perfil</button>
-                    `;
-                    
-                    // Añadir los botones a la celda de acciones
-                    const celdaAcciones = row.querySelector(".actions");
-                    if (celdaAcciones) {
-                        celdaAcciones.innerHTML += botonesAdicionales;
-                    }
-                });
-            } else {
-                const row = document.createElement("tr");
-                row.innerHTML = '<td colspan="7" style="text-align: center;">No hay cuentas asignadas</td>';
-                tbody.appendChild(row);
-            }
-            
-            // Actualizar contador en el badge
-            actualizarBadgeSoporte();
-        });
-}
-</script>
-
+    </script>
 </body>
 </html>
