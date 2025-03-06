@@ -3,334 +3,578 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Cuentas</title>
+    <meta name="description" content="Sistema de gestión de cuentas para servicios de streaming">
+    <title>Sistema de Gestión de Cuentas</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script defer src="app.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Sistema de Gestión de Cuentas</h1>
-        <nav>
+    <header class="main-header">
+        <div class="logo-container">
+            <img src="/api/placeholder/50/50" alt="Logo" class="logo">
+            <h1>Sistema de Gestión de Cuentas</h1>
+        </div>
+        <nav class="main-nav">
             <ul>
-                <li><a href="#dashboard">Dashboard</a></li>
-                <li><a href="#cuentas">Cuentas</a></li>
-                <li><a href="#clientes">Clientes</a></li>
-                <li><a href="#reportes">Reportes</a></li>
+                <li><a href="#dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#cuentas"><i class="fas fa-user-circle"></i> Cuentas</a></li>
+                <li><a href="#asignacion"><i class="fas fa-link"></i> Asignación</a></li>
+                <li><a href="#clientes"><i class="fas fa-users"></i> Clientes</a></li>
+                <li><a href="#reemplazo"><i class="fas fa-exchange-alt"></i> Reemplazo</a></li>
+                <li><a href="#notificaciones"><i class="fas fa-bell"></i> Notificaciones</a></li>
+                <li><a href="#reportes"><i class="fas fa-chart-bar"></i> Reportes</a></li>
             </ul>
         </nav>
+        <div class="user-menu">
+            <span class="user-name">Admin</span>
+            <img src="/api/placeholder/32/32" alt="Usuario" class="user-avatar">
+            <div class="dropdown-menu">
+                <a href="#perfil"><i class="fas fa-user-cog"></i> Mi Perfil</a>
+                <a href="#configuracion"><i class="fas fa-cog"></i> Configuración</a>
+                <a href="#logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+            </div>
+        </div>
     </header>
-    
-    <!-- Dashboard -->
-    <section id="dashboard">
-        <h2>Dashboard</h2>
-        <div class="stats-container">
-            <div class="stat-card">
-                <h3>Total Cuentas</h3>
-                <p id="totalCuentas">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Perfiles Disponibles</h3>
-                <p id="perfilesDisponibles">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Vencimientos Próximos</h3>
-                <p id="vencimientosProximos">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Ingresos Mensuales</h3>
-                <p id="ingresosMensuales">$0</p>
-            </div>
-        </div>
-        <div class="alertas">
-            <h3>Alertas</h3>
-            <ul id="listaAlertas"></ul>
-        </div>
-    </section>
-    
-    <!-- Gestión de Cuentas -->
-    <section id="cuentas">
-        <h2>Gestión de Cuentas</h2>
-        
-        <!-- Registro de Cuenta -->
-        <div class="card">
-            <h3>Registrar Cuenta</h3>
-            <form id="registroCuenta">
-                <div class="form-group">
-                    <label for="servicio">Servicio:</label>
-                    <select id="servicio" required>
-                        <option value="">Seleccionar servicio</option>
-                        <option value="netflix">Netflix</option>
-                        <option value="disney">Disney+</option>
-                        <option value="hbo">HBO Max</option>
-                        <option value="amazon">Prime Video</option>
-                        <option value="otro">Otro</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="plan">Plan:</label>
-                    <select id="plan" required>
-                        <option value="">Seleccionar plan</option>
-                        <option value="basico">Básico</option>
-                        <option value="estandar">Estándar</option>
-                        <option value="premium">Premium</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="correo">Correo:</label>
-                    <input type="email" id="correo" required>
-                </div>
-                <div class="form-group">
-                    <label for="contraseña">Contraseña:</label>
-                    <input type="password" id="contraseña" required>
-                    <button type="button" id="generarContraseña">Generar</button>
-                </div>
-                <div class="form-group">
-                    <label for="perfiles">Cantidad de Perfiles:</label>
-                    <input type="number" id="perfiles" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="costo">Costo de la cuenta:</label>
-                    <input type="number" id="costo" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label for="precioPerfil">Precio por perfil:</label>
-                    <input type="number" id="precioPerfil" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label for="fecha_compra">Fecha de compra:</label>
-                    <input type="date" id="fecha_compra" required>
-                </div>
-                <div class="form-group">
-                    <label for="fecha_vencimiento">Fecha de vencimiento:</label>
-                    <input type="date" id="fecha_vencimiento" required>
-                </div>
-                <div class="form-group">
-                    <label for="notas">Notas adicionales:</label>
-                    <textarea id="notas"></textarea>
-                </div>
-                <button type="submit" class="btn-primary">Registrar Cuenta</button>
-            </form>
-        </div>
-        
-        <!-- Lista de Cuentas -->
-        <div class="card">
-            <h3>Cuentas Registradas</h3>
-            <div class="search-box">
-                <input type="text" id="buscarCuenta" placeholder="Buscar cuenta...">
-                <select id="filtroServicio">
-                    <option value="">Todos los servicios</option>
-                    <option value="netflix">Netflix</option>
-                    <option value="disney">Disney+</option>
-                    <option value="hbo">HBO Max</option>
-                    <option value="amazon">Prime Video</option>
-                </select>
-                <select id="filtroEstado">
-                    <option value="">Todos los estados</option>
-                    <option value="activa">Activa</option>
-                    <option value="vencida">Vencida</option>
-                    <option value="proxima">Próxima a vencer</option>
-                </select>
-            </div>
-            <table id="tablaCuentas">
-                <thead>
-                    <tr>
-                        <th>Servicio</th>
-                        <th>Correo</th>
-                        <th>Perfiles Total</th>
-                        <th>Perfiles Usados</th>
-                        <th>Fecha Vencimiento</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="listaCuentas"></tbody>
-            </table>
-            <div id="paginacionCuentas" class="paginacion"></div>
-        </div>
-    </section>
-    
-    <!-- Asignación de Perfiles -->
-    <section id="asignacion">
-        <h2>Asignación de Perfiles</h2>
-        <div class="card">
-            <h3>Asignar Perfil</h3>
-            <form id="asignarPerfil">
-                <div class="form-group">
-                    <label for="servicioAsignar">Servicio:</label>
-                    <select id="servicioAsignar" required>
-                        <option value="">Seleccionar servicio</option>
-                        <option value="netflix">Netflix</option>
-                        <option value="disney">Disney+</option>
-                        <option value="hbo">HBO Max</option>
-                        <option value="amazon">Prime Video</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="cuentasDisponibles">Cuenta:</label>
-                    <select id="cuentasDisponibles" required></select>
-                    <span id="perfilesRestantes" class="badge"></span>
-                </div>
-                <div class="form-group">
-                    <label for="nombreCliente">Nombre del Cliente:</label>
-                    <input type="text" id="nombreCliente" required>
-                </div>
-                <div class="form-group">
-                    <label for="whatsapp">WhatsApp del Cliente:</label>
-                    <input type="tel" id="whatsapp" required>
-                </div>
-                <div class="form-group">
-                    <label for="emailCliente">Email del Cliente:</label>
-                    <input type="email" id="emailCliente">
-                </div>
-                <div class="form-group">
-                    <label for="nombrePerfil">Nombre del Perfil:</label>
-                    <input type="text" id="nombrePerfil">
-                </div>
-                <div class="form-group">
-                    <label for="pinPerfil">PIN (si aplica):</label>
-                    <input type="text" id="pinPerfil">
-                </div>
-                <div class="form-group">
-                    <label for="fechaAsignacion">Fecha de Asignación:</label>
-                    <input type="date" id="fechaAsignacion" required>
-                </div>
-                <div class="form-group">
-                    <label for="duracionMeses">Duración (meses):</label>
-                    <input type="number" id="duracionMeses" min="1" value="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="precioAsignado">Precio Cobrado:</label>
-                    <input type="number" id="precioAsignado" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label for="metodoPago">Método de Pago:</label>
-                    <select id="metodoPago" required>
-                        <option value="">Seleccionar método</option>
-                        <option value="efectivo">Efectivo</option>
-                        <option value="transferencia">Transferencia</option>
-                        <option value="mercadopago">MercadoPago</option>
-                        <option value="otro">Otro</option>
-                    </select>
-                </div>
-                <p id="advertencia" class="alerta" style="display: none;">⚠️ No hay perfiles disponibles en esta cuenta.</p>
-                <button type="submit" class="btn-primary">Asignar Perfil</button>
-            </form>
-        </div>
-    </section>
-    
-    <!-- Gestión de Clientes -->
-    <section id="clientes">
-        <h2>Gestión de Clientes</h2>
-        <div class="search-box">
-            <input type="text" id="buscarCliente" placeholder="Buscar cliente...">
-            <select id="filtroServicioCliente">
-                <option value="">Todos los servicios</option>
-                <option value="netflix">Netflix</option>
-                <option value="disney">Disney+</option>
-                <option value="hbo">HBO Max</option>
-                <option value="amazon">Prime Video</option>
-            </select>
-            <select id="filtroEstadoCliente">
-                <option value="">Todos los estados</option>
-                <option value="activo">Activo</option>
-                <option value="vencido">Vencido</option>
-                <option value="pendiente">Pendiente renovación</option>
-            </select>
-        </div>
-        <table id="tablaClientes">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>WhatsApp</th>
-                    <th>Email</th>
-                    <th>Servicio</th>
-                    <th>Fecha Asignación</th>
-                    <th>Fecha Vencimiento</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="listaClientes"></tbody>
-        </table>
-        <div id="paginacionClientes" class="paginacion"></div>
-    </section>
-    
-    <!-- Reemplazo de Cuentas -->
-    <section id="reemplazo">
-        <h2>Reemplazo de Cuentas</h2>
-        <div class="card">
-            <h3>Cuentas Caídas</h3>
-            <table id="tablaCuentasCaidas">
-                <thead>
-                    <tr>
-                        <th>Servicio</th>
-                        <th>Correo</th>
-                        <th>Clientes Afectados</th>
-                        <th>Fecha Reporte</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="listaCuentasCaidas"></tbody>
-            </table>
-        </div>
-        
-        <div class="card">
-            <h3>Reemplazar Cuenta</h3>
-            <form id="reemplazoCuenta">
-                <div class="form-group">
-                    <label for="cuentaCaida">Cuenta a reemplazar:</label>
-                    <select id="cuentaCaida" required></select>
-                </div>
-                <div class="form-group">
-                    <label for="servicio">Servicio:</label>
-                    <select id="servicioReemplazo" required>
-                        <option value="">Seleccionar servicio</option>
-                        <option value="netflix">Netflix</option>
-                        <option value="disney">Disney+</option>
-                        <option value="hbo">HBO Max</option>
-                        <option value="amazon">Prime Video</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="nuevoCorreo">Nuevo Correo:</label>
-                    <input type="email" id="nuevoCorreo" required>
-                </div>
-                <div class="form-group">
-                    <label for="nuevaContraseña">Nueva Contraseña:</label>
-                    <input type="password" id="nuevaContraseña" required>
-                </div>
-                <div class="form-group">
-                    <label for="nuevosPerfiles">Cantidad de Perfiles:</label>
-                    <input type="number" id="nuevosPerfiles" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="nuevaFechaVencimiento">Nueva Fecha Vencimiento:</label>
-                    <input type="date" id="nuevaFechaVencimiento" required>
-                </div>
-                <div class="form-group">
-                    <label for="notificarClientes">Notificar a clientes:</label>
-                    <input type="checkbox" id="notificarClientes" checked>
-                </div>
-                <button type="submit" class="btn-primary">Reemplazar Cuenta</button>
-            </form>
-        </div>
-    </section>
-    
-    <!-- Notificaciones -->
-<section id="notificaciones">
-    <h2>Notificaciones</h2>
-    <div class="card">
-        <h3>Enviar Notificaciones</h3>
-        <div class="form-group">
-            <label for="tipoNotificacion">Tipo de notificación:</label>
-            <select id="tipoNotificacion">
-                <option value="renovacion">Renovación de cuenta</option>
-                <option value="reemplazo">Reemplazo de cuenta</option>
-                <option value="informativa">Información general</option>
-                <option value="promocion">Promoción</option>
+<!-- Dashboard -->
+<section id="dashboard" class="dashboard-section">
+    <div class="section-header">
+        <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+        <div class="date-filter">
+            <label for="periodoEstadisticas">Periodo:</label>
+            <select id="periodoEstadisticas">
+                <option value="hoy">Hoy</option>
+                <option value="semana" selected>Esta semana</option>
+                <option value="mes">Este mes</option>
+                <option value="trimestre">Este trimestre</option>
+                <option value="año">Este año</option>
             </select>
         </div>
     </div>
+    
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-user-circle"></i></div>
+            <div class="stat-content">
+                <h3>Total Cuentas</h3>
+                <p id="totalCuentas" class="stat-number">0</p>
+                <p class="stat-change positive"><i class="fas fa-arrow-up"></i> 5% vs anterior</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-id-badge"></i></div>
+            <div class="stat-content">
+                <h3>Perfiles Disponibles</h3>
+                <p id="perfilesDisponibles" class="stat-number">0</p>
+                <p class="stat-change negative"><i class="fas fa-arrow-down"></i> 2% vs anterior</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div class="stat-content">
+                <h3>Vencimientos Próximos</h3>
+                <p id="vencimientosProximos" class="stat-number">0</p>
+                <div class="progress-bar">
+                    <div class="progress" style="width: 65%;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+            <div class="stat-content">
+                <h3>Ingresos Mensuales</h3>
+                <p id="ingresosMensuales" class="stat-number">$0</p>
+                <p class="stat-change positive"><i class="fas fa-arrow-up"></i> 10% vs anterior</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard-widgets">
+        <div class="widget">
+            <div class="widget-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Alertas</h3>
+                <button class="widget-action"><i class="fas fa-sync-alt"></i></button>
+            </div>
+            <div class="widget-content">
+                <ul id="listaAlertas" class="alert-list">
+                    <!-- Las alertas se cargarán dinámicamente -->
+                </ul>
+            </div>
+        </div>
+        
+        <div class="widget">
+            <div class="widget-header">
+                <h3><i class="fas fa-chart-pie"></i> Distribución de Servicios</h3>
+                <button class="widget-action"><i class="fas fa-download"></i></button>
+            </div>
+            <div class="widget-content">
+                <canvas id="serviciosChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+        
+        <div class="widget">
+            <div class="widget-header">
+                <h3><i class="fas fa-tasks"></i> Actividad Reciente</h3>
+                <button class="widget-action"><i class="fas fa-filter"></i></button>
+            </div>
+            <div class="widget-content">
+                <ul id="actividadReciente" class="activity-list">
+                    <!-- La actividad se cargará dinámicamente -->
+                </ul>
+            </div>
+        </div>
+    </div>
 </section>
-</body>
-</html>
+<!-- Gestión de Cuentas - Registro -->
+<section id="cuentas" class="cuentas-section">
+    <div class="section-header">
+        <h2><i class="fas fa-user-circle"></i> Gestión de Cuentas</h2>
+        <div class="section-actions">
+            <button class="btn btn-outline" id="btnImportarCuentas"><i class="fas fa-file-import"></i> Importar</button>
+            <button class="btn btn-outline" id="btnExportarCuentas"><i class="fas fa-file-export"></i> Exportar</button>
+        </div>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="registro">Registrar Cuenta</button>
+        <button class="tab-btn" data-tab="listado">Listado de Cuentas</button>
+    </div>
+    
+    <!-- Registro de Cuenta -->
+    <div class="tab-content active" id="registro-tab">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-plus-circle"></i> Registrar Nueva Cuenta</h3>
+            </div>
+            <div class="card-body">
+                <form id="registroCuenta" class="form-grid">
+                    <div class="form-group">
+                        <label for="servicio">Servicio:</label>
+                        <div class="select-wrapper">
+                            <select id="servicio" required>
+                                <option value="">Seleccionar servicio</option>
+                                <option value="netflix">Netflix</option>
+                                <option value="disney">Disney+</option>
+                                <option value="hbo">HBO Max</option>
+                                <option value="amazon">Prime Video</option>
+                                <option value="spotify">Spotify</option>
+                                <option value="youtube">YouTube Premium</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="plan">Plan:</label>
+                        <div class="select-wrapper">
+                            <select id="plan" required>
+                                <option value="">Seleccionar plan</option>
+                                <option value="basico">Básico</option>
+                                <option value="estandar">Estándar</option>
+                                <option value="premium">Premium</option>
+                                <option value="familiar">Familiar</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="correo">Correo:</label>
+                        <div class="input-icon">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="correo" placeholder="nombre@ejemplo.com" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contraseña">Contraseña:</label>
+                        <div class="input-group">
+                            <div class="input-icon">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" id="contraseña" required>
+                            </div>
+                            <button type="button" id="mostrarContraseña" class="btn-icon"><i class="fas fa-eye"></i></button>
+                            <button type="button" id="generarContraseña" class="btn-secondary">Generar</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="perfiles">Cantidad de Perfiles:</label>
+                        <div class="input-icon">
+                            <i class="fas fa-users"></i>
+                            <input type="number" id="perfiles" min="1" max="10" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="costo">Costo de la cuenta:</label>
+                        <div class="input-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input type="number" id="costo" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="precioPerfil">Precio por perfil:</label>
+                        <div class="input-icon">
+                            <i class="fas fa-tag"></i>
+                            <input type="number" id="precioPerfil" step="0.01" min="0" required>
+                            <span class="calculated-value" id="ganancia">Ganancia: $0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fecha_compra">Fecha de compra:</label>
+                        <div class="input-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                            <input type="date" id="fecha_compra" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fecha_vencimiento">Fecha de vencimiento:</label>
+                        <div class="input-icon">
+                            <i class="fas fa-calendar-times"></i>
+                            <input type="date" id="fecha_vencimiento" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="notas">Notas adicionales:</label>
+                        <textarea id="notas" rows="3" placeholder="Añadir información relevante de la cuenta..."></textarea>
+                    </div>
+                    
+                    <div class="form-actions full-width">
+                        <button type="reset" class="btn btn-outline">Cancelar</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Registrar Cuenta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Gestión de Cuentas - Listado -->
+<div class="tab-content" id="listado-tab">
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-list"></i> Cuentas Registradas</h3>
+            <div class="card-actions">
+                <button class="btn-icon" id="btnRefrescar"><i class="fas fa-sync-alt"></i></button>
+                <button class="btn-icon" id="btnDescargarListado"><i class="fas fa-download"></i></button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscarCuenta" placeholder="Buscar cuenta...">
+                </div>
+                <div class="filter-group">
+                    <div class="select-wrapper small">
+                        <select id="filtroServicio">
+                            <option value="">Todos los servicios</option>
+                            <option value="netflix">Netflix</option>
+                            <option value="disney">Disney+</option>
+                            <option value="hbo">HBO Max</option>
+                            <option value="amazon">Prime Video</option>
+                            <option value="spotify">Spotify</option>
+                            <option value="youtube">YouTube Premium</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+<!-- Asignación de Perfiles -->
+<section id="asignacion" class="asignacion-section">
+    <div class="section-header">
+        <h2><i class="fas fa-link"></i> Asignación de Perfiles</h2>
+        <div class="section-actions">
+            <button class="btn btn-outline" id="btnHistorialAsignaciones"><i class="fas fa-history"></i> Historial</button>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-user-plus"></i> Asignar Perfil</h3>
+        </div>
+        <div class="card-body">
+            <form id="asignarPerfil" class="form-grid">
+                <div class="form-group">
+                    <label for="servicioAsignar">Servicio:</label>
+                    <div class="select-wrapper">
+                        <select id="servicioAsignar" required>
+                            <option value="">Seleccionar servicio</option>
+                            <option value="netflix">Netflix</option>
+                            <option value="disney">Disney+</option>
+                            <option value="hbo">HBO Max</option>
+                            <option value="amazon">Prime Video</option>
+                            <option value="spotify">Spotify</option>
+                            <option value="youtube">YouTube Premium</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cuentasDisponibles">Cuenta:</label>
+                    <div class="select-wrapper">
+                        <select id="cuentasDisponibles" required>
+                            <option value="">Seleccione una cuenta</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <span id="perfilesRestantes" class="badge"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nombreCliente">Nombre del Cliente:</label>
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="nombreCliente" placeholder="Nombre completo" required>
+                    </div>
+                    <div class="cliente-existente" id="clienteExistente">
+                        <span>Cliente existente</span>
+                        <button type="button" class="btn-text" id="btnSeleccionarCliente">Seleccionar</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="whatsapp">WhatsApp del Cliente:</label>
+                    <div class="input-icon">
+                        <i class="fab fa-whatsapp"></i>
+                        <input type="tel" id="whatsapp" placeholder="+52 1234567890" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="emailCliente">Email del Cliente:</label>
+                    <div class="input-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="emailCliente" placeholder="cliente@email.com">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nombrePerfil">Nombre del Perfil:</label>
+                    <div class="input-icon">
+                        <i class="fas fa-id-badge"></i>
+                        <input type="text" id="nombrePerfil" placeholder="Nombre del perfil">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pinPerfil">PIN (si aplica):</label>
+                    <div class="input-icon">
+                        <i class="fas fa-key"></i>
+                        <input type="text" id="pinPerfil" placeholder="1234">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fechaAsignacion">Fecha de Asignación:</label>
+                    <div class="input-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                        <input type="date" id="fechaAsignacion" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="duracionMeses">Duración (meses):</label>
+                    <div class="input-icon">
+                        <i class="fas fa-calendar-week"></i>
+                        <input type="number" id="duracionMeses" min="1" value="1" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="precioAsignado">Precio Cobrado:</label>
+                    <div class="input-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input type="number" id="precioAsignado" step="0.01" min="0" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="metodoPago">Método de Pago:</label>
+                    <div class="select-wrapper">
+                        <select id="metodoPago" required>
+                            <option value="">Seleccionar método</option>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="transferencia">Transferencia</option>
+                            <option value="mercadopago">MercadoPago</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="notasAsignacion">Notas adicionales:</label>
+                    <textarea id="notasAsignacion" rows="2" placeholder="Información adicional sobre la asignación..."></textarea>
+                </div>
+                
+                <div class="form-group full-width">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enviarInstrucciones" checked>
+                        <label for="enviarInstrucciones">Enviar instrucciones al cliente</label>
+                    </div>
+                </div>
+                
+                <p id="advertencia" class="alerta" style="display: none;"><i class="fas fa-exclamation-triangle"></i> No hay perfiles disponibles en esta cuenta.</p>
+                
+                <div class="form-actions full-width">
+                    <button type="reset" class="btn btn-outline">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> Asignar Perfil</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<!-- Gestión de Clientes -->
+<section id="clientes" class="clientes-section">
+    <div class="section-header">
+        <h2><i class="fas fa-users"></i> Gestión de Clientes</h2>
+        <div class="section-actions">
+            <button class="btn btn-outline" id="btnImportarClientes"><i class="fas fa-file-import"></i> Importar</button>
+            <button class="btn btn-outline" id="btnExportarClientes"><i class="fas fa-file-export"></i> Exportar</button>
+            <button class="btn btn-primary" id="btnNuevoCliente"><i class="fas fa-user-plus"></i> Nuevo Cliente</button>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-address-book"></i> Directorio de Clientes</h3>
+            <div class="card-actions">
+                <button class="btn-icon" id="btnRefrescarClientes"><i class="fas fa-sync-alt"></i></button>
+                <div class="dropdown">
+                    <button class="btn-icon" id="btnMasAcciones"><i class="fas fa-ellipsis-v"></i></button>
+                    <div class="dropdown-menu">
+                        <a href="#" id="btnEnviarMasivo"><i class="fas fa-paper-plane"></i> Envío masivo</a>
+                        <a href="#" id="btnAnalisisClientes"><i class="fas fa-chart-line"></i> Análisis</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscarCliente" placeholder="Buscar cliente...">
+                </div>
+                <div class="filter-group">
+                    <div class="select-wrapper small">
+                        <select id="filtroServicioCliente">
+                            <option value="">Todos los servicios</option>
+                            <option value="netflix">Netflix</option>
+                            <option value="disney">Disney+</option>
+                            <option value="hbo">HBO Max</option>
+                            <option value="amazon">Prime Video</option>
+                            <option value="spotify">Spotify</option>
+                            <option value="youtube">YouTube Premium</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="select-wrapper small">
+                        <select id="filtroEstadoCliente">
+                            <option value="">Todos los estados</option>
+                            <option value="activo">Activo</option>
+                            <option value="vencido">Vencido</option>
+                            <option value="pendiente">Pendiente renovación</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="tablaClientes" class="data-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="seleccionarTodosClientes"></th>
+                            <th>Nombre <i class="fas fa-sort"></i></th>
+                            <th>WhatsApp</th>
+                            <th>Email</th>
+                            <th>Servicio</th>
+                            <th>Fecha Asignación <i class="fas fa-sort"></i></th>
+                            <th>Fecha Vencimiento <i class="fas fa-sort"></i></th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaClientes">
+                        <!-- Se cargará dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Mostrando <span id="clientesDesde">1</span> - <span id="clientesHasta">10</span> de <span id="totalClientesRegistrados">0</span> clientes
+                </div>
+                <div id="paginacionClientes" class="pagination">
+                    <!-- Se cargará dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Reemplazo de Cuentas -->
+<section id="reemplazo" class="reemplazo-section">
+    <div class="section-header">
+        <h2><i class="fas fa-exchange-alt"></i> Reemplazo de Cuentas</h2>
+        <div class="section-actions">
+            <button class="btn btn-outline" id="btnHistorialReemplazos"><i class="fas fa-history"></i> Historial</button>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-exclamation-circle"></i> Cuentas con Problemas</h3>
+            <div class="card-actions">
+                <button class="btn-icon" id="btnRefrescarCuentasCaidas"><i class="fas fa-sync-alt"></i></button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscarCuentaCaida" placeholder="Buscar cuenta...">
+                </div>
+                <div class="filter-group">
+                    <div class="select-wrapper small">
+                        <select id="filtroServicioCaido">
+                            <option value="">Todos los servicios</option>
+                            <option value="netflix">Netflix</option>
+                            <option value="disney">Disney+</option>
+                            <option value="hbo">HBO Max</option>
+                            <option value="amazon">Prime Video</option>
+                            <option value="spotify">Spotify</option>
+                            <option value="youtube">YouTube Premium</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="select-wrapper small">
+                        <select id="filtroEstadoCaido">
+                            <option value="">Todos los estados</option>
+                            <option value="reportado">Reportado</option>
+                            <option value="verificado">Verificado</option>
+                            <option value="pendiente">Pendiente reemplazo</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="tablaCuentasCaidas" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Servicio</th>
+                            <th>Correo</th>
+                            <th>Clientes Afectados</th>
+                            <th>Fecha Reporte</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
