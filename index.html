@@ -3,38 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ventas y Soporte</title>
+    <title>Prueba Supabase</title>
 </head>
 <body>
-    <nav>
-        <button onclick="mostrarSeccion('soporte')">Soporte</button>
-        <button onclick="mostrarSeccion('ventas')">Ventas</button>
-    </nav>
-    
-    <section id="soporte" style="display: none;">
-        <h2>Soporte</h2>
-        <form id="form-cuenta">
-            <input type="email" id="correo" placeholder="Correo" required>
-            <input type="password" id="contraseña" placeholder="Contraseña" required>
-            <input type="text" id="plataforma" placeholder="Plataforma" required>
-            <input type="number" id="perfiles" placeholder="Perfiles" required>
-            <button type="submit">Agregar Cuenta</button>
-        </form>
-    </section>
 
-    <section id="ventas" style="display: none;">
-        <h2>Ventas</h2>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Correo</th>
-                    <th>Plataforma</th>
-                    <th>Perfiles</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-cuentas"></tbody>
-        </table>
-    </section>
+    <h2>Prueba de conexión a Supabase</h2>
+    <form id="form-prueba">
+        <input type="email" id="correo" placeholder="Correo" required>
+        <input type="password" id="contraseña" placeholder="Contraseña" required>
+        <input type="text" id="plataforma" placeholder="Plataforma" required>
+        <input type="number" id="perfiles" placeholder="Perfiles" required>
+        <button type="submit">Agregar Cuenta</button>
+    </form>
+
+    <p id="resultado"></p>
 
     <script type="module">
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
@@ -43,44 +25,25 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        window.mostrarSeccion = async function (seccion) {
-            document.getElementById("soporte").style.display = seccion === "soporte" ? "block" : "none";
-            document.getElementById("ventas").style.display = seccion === "ventas" ? "block" : "none";
-            
-            if (seccion === "ventas") {
-                cargarCuentas();
-            }
-        };
-
-        document.getElementById("form-cuenta").addEventListener("submit", async function (event) {
+        document.getElementById("form-prueba").addEventListener("submit", async function (event) {
             event.preventDefault();
             const correo = document.getElementById("correo").value;
             const contraseña = document.getElementById("contraseña").value;
             const plataforma = document.getElementById("plataforma").value;
-            const perfiles = document.getElementById("perfiles").value;
+            const perfiles = parseInt(document.getElementById("perfiles").value);
 
-            let { error } = await supabase.from("cuentas").insert([{ correo, contraseña, plataforma, perfiles }]);
+            const { data, error } = await supabase.from("netflix").insert([
+                { correo, contraseña, plataforma, perfiles }
+            ]);
+
             if (error) {
-                alert("Error al guardar la cuenta: " + error.message);
+                console.error("Error al guardar:", error);
+                document.getElementById("resultado").innerText = "❌ Error: " + JSON.stringify(error);
             } else {
-                alert("Cuenta agregada correctamente");
-                document.getElementById("form-cuenta").reset();
+                document.getElementById("resultado").innerText = "✅ Cuenta agregada correctamente";
             }
         });
-
-        async function cargarCuentas() {
-            let { data, error } = await supabase.from("cuentas").select("correo, plataforma, perfiles");
-            if (error) {
-                alert("Error al cargar las cuentas: " + error.message);
-                return;
-            }
-            let tabla = document.getElementById("tabla-cuentas");
-            tabla.innerHTML = "";
-            data.forEach(cuenta => {
-                let fila = `<tr><td>${cuenta.correo}</td><td>${cuenta.plataforma}</td><td>${cuenta.perfiles}</td></tr>`;
-                tabla.innerHTML += fila;
-            });
-        }
     </script>
+
 </body>
 </html>
