@@ -3,47 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba Supabase</title>
+    <title>Gestión de Cuentas</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script defer src="app.js"></script>
 </head>
 <body>
-
-    <h2>Prueba de conexión a Supabase</h2>
-    <form id="form-prueba">
+    <h1>Gestión de Cuentas Streaming</h1>
+    
+    <!-- Soporte -->
+    <h2>Agregar Cuenta</h2>
+    <form id="addAccountForm">
         <input type="email" id="correo" placeholder="Correo" required>
         <input type="password" id="contraseña" placeholder="Contraseña" required>
         <input type="text" id="plataforma" placeholder="Plataforma" required>
         <input type="number" id="perfiles" placeholder="Perfiles" required>
-        <button type="submit">Agregar Cuenta</button>
+        <button type="submit">Agregar</button>
     </form>
+    
+    <h2>Asignar Cuenta a Cliente</h2>
+    <form id="assignClientForm">
+        <input type="email" id="clientCorreo" placeholder="Correo Cliente" required>
+        <input type="email" id="accountCorreo" placeholder="Correo Cuenta" required>
+        <button type="submit">Asignar</button>
+    </form>
+    
+    <h2>Lista de Cuentas Disponibles</h2>
+    <ul id="cuentasList"></ul>
 
-    <p id="resultado"></p>
+    <h2>Eliminar Cuenta</h2>
+    <form id="deleteAccountForm">
+        <input type="email" id="deleteCorreo" placeholder="Correo Cuenta" required>
+        <button type="submit">Eliminar</button>
+    </form>
+    
+    <!-- Ventas -->
+    <h2>Lista de Clientes Reasignados</h2>
+    <ul id="reasignadosList"></ul>
+    
+    <h2>Consultar Fechas de Vencimiento</h2>
+    <button id="checkPayments">Consultar Pagos</button>
+    <ul id="paymentList"></ul>
 
-    <script type="module">
-        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
+    <script>
         const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        document.getElementById("form-prueba").addEventListener("submit", async function (event) {
-            event.preventDefault();
-            const correo = document.getElementById("correo").value;
-            const contraseña = document.getElementById("contraseña").value;
-            const plataforma = document.getElementById("plataforma").value;
-            const perfiles = parseInt(document.getElementById("perfiles").value);
-
-            const { data, error } = await supabase.from("netflix").insert([
-                { correo, contraseña, plataforma, perfiles }
-            ]);
-
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        document.getElementById('addAccountForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const correo = document.getElementById('correo').value;
+            const contraseña = document.getElementById('contraseña').value;
+            const plataforma = document.getElementById('plataforma').value;
+            const perfiles = document.getElementById('perfiles').value;
+            
+            const { data, error } = await supabase
+                .from('netflix')
+                .insert([{ correo, contraseña, plataforma, perfiles }]);
+            
             if (error) {
-                console.error("Error al guardar:", error);
-                document.getElementById("resultado").innerText = "❌ Error: " + JSON.stringify(error);
+                alert('Error al agregar cuenta: ' + error.message);
             } else {
-                document.getElementById("resultado").innerText = "✅ Cuenta agregada correctamente";
+                alert('Cuenta agregada con éxito');
+                cargarCuentas();
             }
         });
+        
+        document.getElementById('deleteAccountForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const correo = document.getElementById('deleteCorreo').value;
+            
+            const { error } = await supabase
+                .from('netflix')
+                .delete()
+                .match({ correo });
+            
+            if (error) {
+                alert('Error al eliminar cuenta: ' + error.message);
+            } else {
+                alert('Cuenta eliminada con éxito');
+                cargarCuentas();
+            }
+        });
+        
+        async function cargarCuentas() {
+            const { data, error } = await supabase
+                .from('netflix')
+                .select('*');
+            
+            if (error) {
+                console.error('Error al obtener cuentas', error);
+                return;
+            }
+            
+            const cuentasList = document.getElementById('cuentasList');
+            cuentasList.innerHTML = '';
+            data.forEach((cuenta) => {
+                const li = document.createElement('li');
+                li.textContent = `${cuenta.plataforma} - ${cuenta.correo}`;
+                cuentasList.appendChild(li);
+            });
+        }
+        
+        document.getElementById('checkPayments').addEventListener('click', async () => {
+            const { data, error } = await supabase
+                .from('pagos')
+                .select('*');
+            
+            if (error) {
+                console.error('Error al obtener pagos', error);
+                return;
+            }
+            
+            const paymentList = document.getElementById('paymentList');
+            paymentList.innerHTML = '';
+            data.forEach((pago) => {
+                const li = document.createElement('li');
+                li.textContent = `Cliente: ${pago.cliente_id} - Fecha de pago: ${pago.fecha_vencimiento}`;
+                paymentList.appendChild(li);
+            });
+        });
+        
+        cargarCuentas();
     </script>
-
 </body>
 </html>
+
