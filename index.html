@@ -117,6 +117,22 @@
             color: white;
             font-size: 12px;
         }
+        /* Estilos para destacar los botones de las nuevas funcionalidades */
+.btn-soporte {
+    background-color: #3498db;
+}
+.btn-soporte:hover {
+    background-color: #2980b9;
+}
+.nueva-funcion {
+    margin-top: 5px;
+    width: 100%;
+}
+.perfil-asignado {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+}
     </style>
 </head>
 <body>
@@ -249,7 +265,46 @@
             <tbody id="soporte-list"></tbody>
         </table>
     </div>
+<!-- Modal para asignar días adicionales -->
+<div id="modal-dias" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModal('modal-dias')">&times;</span>
+        <h3>Asignar Días Adicionales</h3>
+        <input type="hidden" id="dias-id">
+        <p>Cuenta: <span id="dias-cuenta"></span></p>
+        <p>Vencimiento actual: <span id="dias-vencimiento"></span></p>
+        <div class="form-group">
+            <label for="dias-cantidad">Días a añadir:</label>
+            <input type="number" id="dias-cantidad" min="1" value="30">
+        </div>
+        <div class="form-group">
+            <label for="dias-motivo">Motivo:</label>
+            <input type="text" id="dias-motivo" placeholder="Ej: Compensación por caída">
+        </div>
+        <button onclick="asignarDiasAdicionales()">Asignar Días</button>
+    </div>
+</div>
 
+<!-- Modal para cambiar perfil de usuario -->
+<div id="modal-perfil" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModal('modal-perfil')">&times;</span>
+        <h3>Cambiar Perfil de Usuario</h3>
+        <input type="hidden" id="perfil-id">
+        <p>Cuenta: <span id="perfil-cuenta"></span></p>
+        <p>Cliente: <span id="perfil-cliente"></span></p>
+        <div class="form-group">
+            <label for="perfil-nombre">Nombre del perfil:</label>
+            <input type="text" id="perfil-nombre" placeholder="Nombre del perfil a usar">
+        </div>
+        <div class="form-group">
+            <label for="perfil-pin">PIN (opcional):</label>
+            <input type="text" id="perfil-pin" placeholder="PIN si es necesario">
+        </div>
+        <button onclick="cambiarPerfil()">Guardar Cambios</button>
+    </div>
+</div>
+    
     <!-- Modal para editar cuenta -->
     <div id="modal-editar" class="modal">
         <div class="modal-content">
@@ -1057,6 +1112,258 @@ Si tienes algún problema con tu cuenta, no dudes en contactarnos.
             showNotification("Error de conexión con Supabase. Verifica tus credenciales en el código.", true);
         }
     });
+    // Función para abrir el modal de asignar días adicionales
+async function abrirModalDias(id) {
+    try {
+        const { data, error } = await supabase.from("netflix")
+            .select("*")
+            .eq("id", id)
+            .single();
+            
+        if (error) {
+            throw error;
+        }
+        
+        document.getElementById("dias-id").value = data.id;
+        document.getElementById("dias-cuenta").textContent = data.correo;
+        document.getElementById("dias-vencimiento").textContent = new Date(data.fecha_vencimiento).toLocaleDateString();
+        
+        abrirModal('modal-dias');
+        
+    } catch (error) {
+        console.error("Error al abrir modal de días:", error);
+        showNotification("Error: " + error.message, true);
+    }
+}
+
+// Función para asignar días adicionales
+async function asignarDiasAdicionales() {
+    try {
+        const id = document.getElementById("dias-id").value;
+        const diasAdicionales = parseInt(document.getElementById("dias-cantidad").value);
+        const motivo = document.getElementById("dias-motivo").value;
+        
+        if (!diasAdicionales || diasAdicionales <= 0) {
+            showNotification("La cantidad de días debe ser un número positivo", true);
+            return;
+        }
+        
+        // Obtener la cuenta actual
+        const { data: cuentaActual, error: errorCuenta } = await supabase.from("netflix")
+            .select("*")
+            .eq("id", id)
+            .single();
+            
+        if (errorCuenta) {
+            throw errorCuenta;
+        }
+        
+        // Calcular nueva fecha de vencimiento
+        const fechaActual = new Date(cuentaActual.fecha_vencimiento);
+        fechaActual.setDate(fechaActual.getDate() + diasAdicionales);
+        const nuevaFechaVencimiento = fechaActual.toISOString().split('T')[0];
+        
+        // Actualizar la fecha de vencimiento
+        const { error: errorUpdate } = await supabase.from("netflix")
+            .update({ 
+                fecha_vencimiento: nuevaFechaVencimiento,
+                historial_extensiones: cuentaActual.historial_extensiones 
+                    ? cuentaActual.historial_extensiones + `, ${new Date().toLocaleDateString()}: +${diasAdicionales} días (${motivo})`
+                    : `${new Date().toLocaleDateString()}: +${diasAdicionales} días (${motivo})`
+            })
+            .eq("id", id);
+            
+        if (errorUpdate) {
+            throw errorUpdate;
+        }
+        
+        showNotification(`Se han añadido ${diasAdicionales} días a la cuenta. Nueva fecha de vencimiento: ${new Date(nuevaFechaVencimiento).toLocaleDateString()}`);
+        cerrarModal('modal-dias');
+        
+        // Recargar la lista de cuentas según el área actual
+        if (currentArea === 'ventas') {
+            cargarCuentas();
+        } else {
+            cargarCuentasSoporte();
+        }
+        
+    } catch (error) {
+        console.error("Error al asignar días adicionales:", error);
+        showNotification("Error: " + error.message, true);
+    }
+}
+
+// Función para abrir el modal de cambio de perfil
+async function abrirModalPerfil(id) {
+    try {
+        const { data, error } = await supabase.from("netflix")
+            .select("*")
+            .eq("id", id)
+            .single();
+            
+        if (error) {
+            throw error;
+        }
+        
+        document.getElementById("perfil-id").value = data.id;
+        document.getElementById("perfil-cuenta").textContent = data.correo;
+        document.getElementById("perfil-cliente").textContent = data.cliente_asignado || "No asignado";
+        
+        // Si ya hay un perfil asignado, mostrarlo
+        if (data.perfil_asignado) {
+            document.getElementById("perfil-nombre").value = data.perfil_asignado;
+        }
+        
+        // Si ya hay un PIN asignado, mostrarlo
+        if (data.perfil_pin) {
+            document.getElementById("perfil-pin").value = data.perfil_pin;
+        }
+        
+        abrirModal('modal-perfil');
+        
+    } catch (error) {
+        console.error("Error al abrir modal de perfil:", error);
+        showNotification("Error: " + error.message, true);
+    }
+}
+
+// Función para cambiar el perfil de usuario
+async function cambiarPerfil() {
+    try {
+        const id = document.getElementById("perfil-id").value;
+        const nombrePerfil = document.getElementById("perfil-nombre").value;
+        const pinPerfil = document.getElementById("perfil-pin").value;
+        
+        if (!nombrePerfil) {
+            showNotification("Debe especificar un nombre de perfil", true);
+            return;
+        }
+        
+        // Actualizar el perfil en la base de datos
+        const { error } = await supabase.from("netflix")
+            .update({ 
+                perfil_asignado: nombrePerfil,
+                perfil_pin: pinPerfil,
+                fecha_cambio_perfil: new Date().toISOString()
+            })
+            .eq("id", id);
+            
+        if (error) {
+            throw error;
+        }
+        
+        showNotification(`Perfil actualizado correctamente: ${nombrePerfil}`);
+        cerrarModal('modal-perfil');
+        
+        // Recargar la lista de cuentas según el área actual
+        if (currentArea === 'ventas') {
+            cargarCuentas();
+        } else {
+            cargarCuentasSoporte();
+        }
+        
+    } catch (error) {
+        console.error("Error al cambiar perfil:", error);
+        showNotification("Error: " + error.message, true);
+    }
+}
+
+// Modificar las funciones existentes para incluir los nuevos botones en las tablas
+function cargarCuentas() {
+    // Mantener la función original y añadir los nuevos botones
+    supabase.from("netflix").select("*").then(({ data, error }) => {
+        if (error) {
+            console.error("Error al cargar cuentas:", error);
+            showNotification("Error al cargar las cuentas: " + error.message, true);
+            return;
+        }
+        
+        const tbody = document.getElementById("cuentas-list");
+        tbody.innerHTML = "";
+        
+        if (data && data.length > 0) {
+            data.forEach(cuenta => {
+                // Añadir código para mostrar el perfil asignado si existe
+                const perfilInfo = cuenta.perfil_asignado ? 
+                    `<div class="perfil-asignado">Perfil: ${cuenta.perfil_asignado}${cuenta.perfil_pin ? ' (PIN: ' + cuenta.perfil_pin + ')' : ''}</div>` : 
+                    "";
+                
+                // Código existente para crear filas de la tabla
+                // ...
+                
+                // Añadir los nuevos botones al final de las acciones
+                const botonesAdicionales = `
+                    <button class="btn-soporte nueva-funcion" onclick="abrirModalDias(${cuenta.id})">Añadir Días</button>
+                    <button class="btn-soporte nueva-funcion" onclick="abrirModalPerfil(${cuenta.id})">Cambiar Perfil</button>
+                `;
+                
+                // Añadir los botones a la celda de acciones
+                const celdaAcciones = row.querySelector(".actions");
+                if (celdaAcciones) {
+                    celdaAcciones.innerHTML += botonesAdicionales;
+                }
+                
+                // Añadir información del perfil si existe
+                if (perfilInfo) {
+                    const celdaCliente = row.querySelectorAll("td")[9]; // Ajusta el índice según tu estructura
+                    if (celdaCliente) {
+                        celdaCliente.innerHTML += perfilInfo;
+                    }
+                }
+            });
+        } else {
+            const row = document.createElement("tr");
+            row.innerHTML = '<td colspan="12" style="text-align: center;">No hay cuentas registradas</td>';
+            tbody.appendChild(row);
+        }
+    });
+}
+
+function cargarCuentasSoporte() {
+    // Mantener la función original y añadir los nuevos botones
+    supabase.from("netflix")
+        .select("*")
+        .not('cliente_asignado', 'is', null)
+        .then(({ data, error }) => {
+            if (error) {
+                console.error("Error al cargar cuentas de soporte:", error);
+                showNotification("Error al cargar cuentas: " + error.message, true);
+                return;
+            }
+            
+            const tbody = document.getElementById("soporte-list");
+            tbody.innerHTML = "";
+            
+            // Resetear contador de cuentas caídas
+            cuentasCaidas = 0;
+            
+            if (data && data.length > 0) {
+                data.forEach(cuenta => {
+                    // Código existente para crear filas de la tabla
+                    // ...
+                    
+                    // Añadir los nuevos botones al final de las acciones
+                    const botonesAdicionales = `
+                        <button class="btn-soporte nueva-funcion" onclick="abrirModalDias(${cuenta.id})">Añadir Días</button>
+                        <button class="btn-soporte nueva-funcion" onclick="abrirModalPerfil(${cuenta.id})">Cambiar Perfil</button>
+                    `;
+                    
+                    // Añadir los botones a la celda de acciones
+                    const celdaAcciones = row.querySelector(".actions");
+                    if (celdaAcciones) {
+                        celdaAcciones.innerHTML += botonesAdicionales;
+                    }
+                });
+            } else {
+                const row = document.createElement("tr");
+                row.innerHTML = '<td colspan="7" style="text-align: center;">No hay cuentas asignadas</td>';
+                tbody.appendChild(row);
+            }
+            
+            // Actualizar contador en el badge
+            actualizarBadgeSoporte();
+        });
+}
 </script>
 
 </body>
