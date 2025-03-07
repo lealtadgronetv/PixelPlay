@@ -230,8 +230,8 @@
         // Configuración de Supabase
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-        const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co"; // Corrige esta URL con tu URL real
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA"; // Reemplaza con tu clave anónima real
+        const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -273,78 +273,60 @@
             const plataforma = document.getElementById("plataforma").value;
 
             try {
-                
-      // Modificación en la funcionalidad para la página de perfil individual
-document.getElementById("perfilIndividualForm").addEventListener("submit", async function(event) {
-    event.preventDefault();
-
-    // Obtener los valores del formulario
-    const nombre_cliente = document.getElementById("nombre_cliente").value;
-    const perfil_cliente = document.getElementById("perfil_cliente").value;
-    const pin_cliente = document.getElementById("pin_cliente").value || null;
-    const correo_cuenta = document.getElementById("correo_cuenta").value;
-    const contraseña_cuenta = document.getElementById("contraseña_cuenta").value;
-    const fecha_vencimiento = document.getElementById("fecha_vencimiento_perfil").value;
-
-    try {
-        // Primero, verificar si la cuenta existe y tiene perfiles disponibles
-        const { data: cuentaData, error: cuentaError } = await supabase
-            .from("cuentas_completas")
-            .select("id, cantidad_perfiles")
-            .eq("correo", correo_cuenta)
-            .single();
-
-        if (cuentaError) {
-            if (cuentaError.code === 'PGRST116') {
-                alert("La cuenta con este correo no existe. Por favor, registre primero la cuenta completa.");
-                return;
-            }
-            throw cuentaError;
-        }
-
-        if (cuentaData.cantidad_perfiles <= 0) {
-            alert("No hay perfiles disponibles en esta cuenta.");
-            return;
-        }
-
-        // Insertar en tabla de perfiles vendidos
-        const { data, error } = await supabase
-            .from("perfiles_vendidos")
-            .insert([{
-                nombre_cliente,
-                perfil_cliente,
-                pin_cliente,
-                correo_cuenta,
-                contraseña_cuenta,
-                fecha_vencimiento
-            }]);
-
-        if (error) throw error;
-
-        // Actualizar la cantidad de perfiles disponibles en la cuenta completa
-       const { data: cuentaData, error: cuentaError } = await supabase
-    .from("cuentas_completas")
-    .select("id, correo, cantidad_perfiles")
-    .eq("correo", correo_cuenta)
-    .maybeSingle();
-
-        if (updateError) throw updateError;
-
-        alert("Perfil registrado correctamente y stock actualizado.");
-        this.reset(); // Limpiar el formulario
-        
-        // Si estamos en la pestaña del panel, actualizamos las tablas
-        if (document.getElementById("panel").style.display === "block") {
-            cargarCuentas();
-            cargarPerfiles();
-        }
-        
-    } catch (error) {
-        console.error("Error al registrar perfil:", error);
-        alert("Error al registrar el perfil: " + error.message);
-    }
-});
                 // Insertar en Supabase
+                const { data, error } = await supabase
+                    .from("cuentas_completas")
+                    .insert([{
+                        correo,
+                        cantidad_perfiles,
+                        fecha_vencimiento,
+                        plataforma
+                    }]);
+
+                if (error) throw error;
+
+                alert("Cuenta registrada correctamente.");
+                this.reset(); // Limpiar el formulario
+            } catch (error) {
+                console.error("Error al registrar cuenta:", error);
+                alert("Error al registrar la cuenta: " + error.message);
+            }
+        });
+
+        // Funcionalidad para la página de perfil individual (CORREGIDA)
+        document.getElementById("perfilIndividualForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            // Obtener los valores del formulario
+            const nombre_cliente = document.getElementById("nombre_cliente").value;
+            const perfil_cliente = document.getElementById("perfil_cliente").value;
+            const pin_cliente = document.getElementById("pin_cliente").value || null;
+            const correo_cuenta = document.getElementById("correo_cuenta").value;
+            const contraseña_cuenta = document.getElementById("contraseña_cuenta").value;
+            const fecha_vencimiento = document.getElementById("fecha_vencimiento_perfil").value;
+
+            try {
+                // Primero, verificar si la cuenta existe y tiene perfiles disponibles
+                const { data: cuentaData, error: cuentaError } = await supabase
+                    .from("cuentas_completas")
+                    .select("id, cantidad_perfiles")
+                    .eq("correo", correo_cuenta)
+                    .single();
+
+                if (cuentaError) {
+                    if (cuentaError.code === 'PGRST116') {
+                        alert("La cuenta con este correo no existe. Por favor, registre primero la cuenta completa.");
+                        return;
+                    }
+                    throw cuentaError;
+                }
+
+                if (cuentaData.cantidad_perfiles <= 0) {
+                    alert("No hay perfiles disponibles en esta cuenta.");
+                    return;
+                }
+
+                // Insertar en tabla de perfiles vendidos
                 const { data, error } = await supabase
                     .from("perfiles_vendidos")
                     .insert([{
@@ -358,8 +340,23 @@ document.getElementById("perfilIndividualForm").addEventListener("submit", async
 
                 if (error) throw error;
 
-                alert("Perfil registrado correctamente.");
+                // Actualizar la cantidad de perfiles disponibles en la cuenta completa
+                const { data: updatedData, error: updateError } = await supabase
+                    .from("cuentas_completas")
+                    .update({ cantidad_perfiles: cuentaData.cantidad_perfiles - 1 })
+                    .eq("id", cuentaData.id);
+
+                if (updateError) throw updateError;
+
+                alert("Perfil registrado correctamente y stock actualizado.");
                 this.reset(); // Limpiar el formulario
+                
+                // Si estamos en la pestaña del panel, actualizamos las tablas
+                if (document.getElementById("panel").style.display === "block") {
+                    cargarCuentas();
+                    cargarPerfiles();
+                }
+                
             } catch (error) {
                 console.error("Error al registrar perfil:", error);
                 alert("Error al registrar el perfil: " + error.message);
