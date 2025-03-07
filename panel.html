@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Gestión</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1,
+        h2 {
+            color: #333;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        
+        button.delete {
+            background-color: #f44336;
+        }
+        
+        button:hover {
+            opacity: 0.8;
+        }
+        
+        .nav {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Panel de Gestión</h1>
+
+    <div class="nav">
+        <a href="cuenta_completa.html">Cuenta Completa</a>
+        <a href="perfil_individual.html">Perfil Individual</a>
+        <a href="panel.html">Panel de Gestión</a>
+    </div>
+
+    <div class="section">
+        <h2>Cuentas Completas</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Correo</th>
+                    <th>Cantidad de Perfiles</th>
+                    <th>Fecha de Vencimiento</th>
+                    <th>Plataforma</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaCuentas">
+                <!-- Aquí se cargarán las cuentas desde JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Perfiles Vendidos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre del Cliente</th>
+                    <th>Perfil</th>
+                    <th>PIN</th>
+                    <th>Correo de la Cuenta</th>
+                    <th>Contraseña</th>
+                    <th>Fecha de Vencimiento</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaPerfiles">
+                <!-- Aquí se cargarán los perfiles desde JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>
