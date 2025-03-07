@@ -322,10 +322,11 @@ document.getElementById("perfilIndividualForm").addEventListener("submit", async
         if (error) throw error;
 
         // Actualizar la cantidad de perfiles disponibles en la cuenta completa
-        const { error: updateError } = await supabase
-            .from("cuentas_completas")
-            .update({ cantidad_perfiles: cuentaData.cantidad_perfiles - 1 })
-            .eq("id", cuentaData.id);
+       const { data: cuentaData, error: cuentaError } = await supabase
+    .from("cuentas_completas")
+    .select("id, correo, cantidad_perfiles")
+    .eq("correo", correo_cuenta)
+    .maybeSingle();
 
         if (updateError) throw updateError;
 
