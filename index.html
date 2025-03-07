@@ -273,21 +273,7 @@
             const plataforma = document.getElementById("plataforma").value;
 
             try {
-                // Insertar en Supabase
-                const { data, error } = await supabase
-                    .from("cuentas_completas")
-                    .insert([{ correo, cantidad_perfiles, fecha_vencimiento, plataforma }]);
-
-                if (error) throw error;
-
-                alert("Cuenta registrada correctamente.");
-                this.reset(); // Limpiar el formulario
-            } catch (error) {
-                console.error("Error al registrar cuenta:", error);
-                alert("Error al registrar la cuenta: " + error.message);
-            }
-        });
-
+                
       // Modificación en la funcionalidad para la página de perfil individual
 document.getElementById("perfilIndividualForm").addEventListener("submit", async function(event) {
     event.preventDefault();
