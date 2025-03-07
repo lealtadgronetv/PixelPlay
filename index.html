@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Cuentas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.delete {
+            background-color: #f44336;
+        }
+        
+        /* Estilos para las pestañas */
+        .tabs {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            margin-bottom: 20px;
+        }
+        .tabs button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+            margin: 0;
+            color: #333;
+        }
+        .tabs button:hover {
+            background-color: #ddd;
+        }
+        .tabs button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+        
+        /* Estilos para las tablas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sistema de Gestión de Cuentas</h1>
+    
+    <div class="tabs">
+        <button class="tab-button active" onclick="openTab(event, 'cuentaCompleta')">Cuenta Completa</button>
+        <button class="tab-button" onclick="openTab(event, 'perfilIndividual')">Perfil Individual</button>
+        <button class="tab-button" onclick="openTab(event, 'panel')">Panel de Gestión</button>
+    </div>
+    
+    <!-- Pestaña de Cuenta Completa -->
+    <div id="cuentaCompleta" class="tab-content" style="display: block;">
+        <h2>Registro de Cuenta Completa</h2>
+        <form id="cuentaCompletaForm">
+            <div class="form-group">
+                <label for="correo">Correo Electrónico:</label>
+                <input type="email" id="correo" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="cantidad_perfiles">Cantidad de Perfiles:</label>
+                <input type="number" id="cantidad_perfiles" min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="fecha_vencimiento">Fecha de Vencimiento:</label>
+                <input type="date" id="fecha_vencimiento" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="plataforma">Plataforma:</label>
+                <select id="plataforma" required>
+                    <option value="">Seleccione una plataforma</option>
+                    <option value="Netflix">Netflix</option>
+                    <option value="Disney+">Disney+</option>
+                    <option value="HBO Max">HBO Max</option>
+                    <option value="Amazon Prime">Amazon Prime</option>
+                    <option value="Spotify">Spotify</option>
+                    <option value="YouTube Premium">YouTube Premium</option>
+                    <option value="Otra">Otra</option>
+                </select>
+            </div>
+            
+            <button type="submit">Registrar Cuenta</button>
+        </form>
+    </div>
+    
+    <!-- Pestaña de Perfil Individual -->
+    <div id="perfilIndividual" class="tab-content">
+        <h2>Registro de Perfil Individual</h2>
+        <form id="perfilIndividualForm">
+            <div class="form-group">
+                <label for="nombre_cliente">Nombre del Cliente:</label>
+                <input type="text" id="nombre_cliente" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="perfil_cliente">Perfil del Cliente:</label>
+                <input type="text" id="perfil_cliente" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="pin_cliente">PIN del Cliente (opcional):</label>
+                <input type="text" id="pin_cliente">
+            </div>
+            
+            <div class="form-group">
+                <label for="correo_cuenta">Correo de la Cuenta:</label>
+                <input type="email" id="correo_cuenta" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="contraseña_cuenta">Contraseña de la Cuenta:</label>
+                <input type="password" id="contraseña_cuenta" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="fecha_vencimiento_perfil">Fecha de Vencimiento:</label>
+                <input type="date" id="fecha_vencimiento_perfil" required>
+            </div>
+            
+            <button type="submit">Registrar Perfil</button>
+        </form>
+    </div>
+    
+    <!-- Pestaña del Panel de Gestión -->
+    <div id="panel" class="tab-content">
+        <h2>Panel de Gestión</h2>
+        
+        <div class="section">
+            <h3>Cuentas Completas</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Correo</th>
+                        <th>Cantidad de Perfiles</th>
+                        <th>Fecha de Vencimiento</th>
+                        <th>Plataforma</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaCuentas">
+                    <!-- Aquí se cargarán las cuentas desde JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h3>Perfiles Vendidos</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre del Cliente</th>
+                        <th>Perfil</th>
+                        <th>PIN</th>
+                        <th>Correo de la Cuenta</th>
+                        <th>Contraseña</th>
+                        <th>Fecha de Vencimiento</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPerfiles">
+                    <!-- Aquí se cargarán los perfiles desde JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        // Configuración de Supabase
+        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+        const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co"; // Corrige esta URL con tu URL real
+        const SUPABASE_KEY = "your-actual-anon-key"; // Reemplaza con tu clave anónima real
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Funcionalidad para las pestañas
+        window.openTab = function(evt, tabName) {
+            var i, tabContent, tabButtons;
+            
+            // Ocultar todos los contenidos de pestañas
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].style.display = "none";
+            }
+            
+            // Desactivar todos los botones de pestañas
+            tabButtons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+            }
+            
+            // Mostrar la pestaña actual y activar el botón
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+            
+            // Cargar datos si estamos en la pestaña del panel
+            if (tabName === "panel") {
+                cargarCuentas();
+                cargarPerfiles();
+            }
+        };
+
+        // Funcionalidad para la página de cuenta completa
+        document.getElementById("cuentaCompletaForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            // Obtener los valores del formulario
+            const correo = document.getElementById("correo").value;
+            const cantidad_perfiles = parseInt(document.getElementById("cantidad_perfiles").value);
+            const fecha_vencimiento = document.getElementById("fecha_vencimiento").value;
+            const plataforma = document.getElementById("plataforma").value;
+
+            try {
+                // Insertar en Supabase
+                const { data, error } = await supabase
+                    .from("cuentas_completas")
+                    .insert([{ correo, cantidad_perfiles, fecha_vencimiento, plataforma }]);
+
+                if (error) throw error;
+
+                alert("Cuenta registrada correctamente.");
+                this.reset(); // Limpiar el formulario
+            } catch (error) {
+                console.error("Error al registrar cuenta:", error);
+                alert("Error al registrar la cuenta: " + error.message);
+            }
+        });
+
+        // Funcionalidad para la página de perfil individual
+        document.getElementById("perfilIndividualForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            // Obtener los valores del formulario
+            const nombre_cliente = document.getElementById("nombre_cliente").value;
+            const perfil_cliente = document.getElementById("perfil_cliente").value;
+            const pin_cliente = document.getElementById("pin_cliente").value || null;
+            const correo_cuenta = document.getElementById("correo_cuenta").value;
+            const contraseña_cuenta = document.getElementById("contraseña_cuenta").value;
+            const fecha_vencimiento = document.getElementById("fecha_vencimiento_perfil").value;
+
+            try {
+                // Insertar en Supabase
+                const { data, error } = await supabase
+                    .from("perfiles_vendidos")
+                    .insert([{
+                        nombre_cliente,
+                        perfil_cliente,
+                        pin_cliente,
+                        correo_cuenta,
+                        contraseña_cuenta,
+                        fecha_vencimiento
+                    }]);
+
+                if (error) throw error;
+
+                alert("Perfil registrado correctamente.");
+                this.reset(); // Limpiar el formulario
+            } catch (error) {
+                console.error("Error al registrar perfil:", error);
+                alert("Error al registrar el perfil: " + error.message);
+            }
+        });
+
+        // Función para cargar cuentas completas
+        async function cargarCuentas() {
+            try {
+                const { data, error } = await supabase.from("cuentas_completas").select("*");
+                if (error) throw error;
+
+                const tablaCuentas = document.getElementById("tablaCuentas");
+                if (!tablaCuentas) return;
+
+                tablaCuentas.innerHTML = ""; // Limpiar la tabla antes de llenar
+
+                data.forEach((cuenta) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${cuenta.id}</td>
+                        <td>${cuenta.correo}</td>
+                        <td>${cuenta.cantidad_perfiles}</td>
+                        <td>${cuenta.fecha_vencimiento}</td>
+                        <td>${cuenta.plataforma}</td>
+                        <td>
+                            <button onclick="eliminarCuenta(${cuenta.id})">Eliminar</button>
+                            <button onclick="reemplazarCuenta(${cuenta.id})">Reemplazar</button>
+                        </td>
+                    `;
+                    tablaCuentas.appendChild(row);
+                });
+            } catch (error) {
+                console.error("Error al obtener cuentas:", error);
+                alert("Error al cargar las cuentas: " + error.message);
+            }
+        }
+
+        // Función para cargar perfiles vendidos
+        async function cargarPerfiles() {
+            try {
+                const { data, error } = await supabase.from("perfiles_vendidos").select("*");
+                if (error) throw error;
+
+                const tablaPerfiles = document.getElementById("tablaPerfiles");
+                if (!tablaPerfiles) return;
+
+                tablaPerfiles.innerHTML = ""; // Limpiar la tabla antes de llenar
+
+                data.forEach((perfil) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${perfil.id}</td>
+                        <td>${perfil.nombre_cliente}</td>
+                        <td>${perfil.perfil_cliente}</td>
+                        <td>${perfil.pin_cliente || "N/A"}</td>
+                        <td>${perfil.correo_cuenta}</td>
+                        <td>${perfil.contraseña_cuenta}</td>
+                        <td>${perfil.fecha_vencimiento}</td>
+                        <td>
+                            <button onclick="eliminarPerfil(${perfil.id})">Eliminar</button>
+                            <button onclick="reemplazarPerfil(${perfil.id})">Reemplazar</button>
+                        </td>
+                    `;
+                    tablaPerfiles.appendChild(row);
+                });
+            } catch (error) {
+                console.error("Error al obtener perfiles:", error);
+                alert("Error al cargar los perfiles: " + error.message);
+            }
+        }
+
+        // Función para eliminar una cuenta
+        window.eliminarCuenta = async function(id) {
+            if (!confirm("¿Está seguro que desea eliminar esta cuenta?")) return;
+
+            try {
+                const { error } = await supabase.from("cuentas_completas").delete().match({ id });
+                if (error) throw error;
+
+                alert("Cuenta eliminada correctamente.");
+                cargarCuentas(); // Recargar la tabla
+            } catch (error) {
+                console.error("Error al eliminar cuenta:", error);
+                alert("Error al eliminar la cuenta: " + error.message);
+            }
+        };
+
+        // Función para eliminar un perfil
+        window.eliminarPerfil = async function(id) {
+            if (!confirm("¿Está seguro que desea eliminar este perfil?")) return;
+
+            try {
+                const { error } = await supabase.from("perfiles_vendidos").delete().match({ id });
+                if (error) throw error;
+
+                alert("Perfil eliminado correctamente.");
+                cargarPerfiles(); // Recargar la tabla
+            } catch (error) {
+                console.error("Error al eliminar perfil:", error);
+                alert("Error al eliminar el perfil: " + error.message);
+            }
+        };
+
+        // Función para reemplazar una cuenta
+        window.reemplazarCuenta = async function(id) {
+            const nuevoCorreo = prompt("Ingrese el nuevo correo de la cuenta:");
+            if (!nuevoCorreo) return;
+
+            try {
+                const { error } = await supabase
+                    .from("cuentas_completas")
+                    .update({ correo: nuevoCorreo })
+                    .match({ id });
+
+                if (error) throw error;
+
+                alert("Cuenta actualizada correctamente.");
+                cargarCuentas(); // Recargar la tabla
+            } catch (error) {
+                console.error("Error al reemplazar cuenta:", error);
+                alert("Error al actualizar la cuenta: " + error.message);
+            }
+        };
+
+        // Función para reemplazar un perfil
+        window.reemplazarPerfil = async function(id) {
+            const nuevoPerfil = prompt("Ingrese el nuevo perfil del cliente:");
+            if (!nuevoPerfil) return;
+
+            try {
+                const { error } = await supabase
+                    .from("perfiles_vendidos")
+                    .update({ perfil_cliente: nuevoPerfil })
+                    .match({ id });
+
+                if (error) throw error;
+
+                alert("Perfil actualizado correctamente.");
+                cargarPerfiles(); // Recargar la tabla
+            } catch (error) {
+                console.error("Error al reemplazar perfil:", error);
+                alert("Error al actualizar el perfil: " + error.message);
+            }
+        };
+    </script>
+</body>
+</html>
