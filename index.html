@@ -3,812 +3,536 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión de Cuentas</title>
+    <title>Partidos de hoy</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <!-- NO BLOQUEAR ADS -->
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-        h1, h2, h3 {
-            color: #333;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 5px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button.delete {
-            background-color: #f44336;
-        }
         
-        /* Estilos para las pestañas */
-        .tabs {
-            overflow: hidden;
-            border: 1px solid #ccc;
-            background-color: #f1f1f1;
+        header {
+            background-color: #232323;
+            padding: 15px;
+            text-align: center;
             margin-bottom: 20px;
         }
-        .tabs button {
-            background-color: inherit;
-            float: left;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            padding: 14px 16px;
-            transition: 0.3s;
-            font-size: 16px;
+        
+        h1 {
             margin: 0;
-            color: #333;
-        }
-        .tabs button:hover {
-            background-color: #ddd;
-        }
-        .tabs button.active {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .tab-content {
-            display: none;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-top: none;
+            color: #f1c40f;
         }
         
-        /* Estilos para las tablas */
-        table {
+        .ad-container {
+            margin: 20px auto;
+            text-align: center;
+            overflow: hidden;
+            min-height: 100px;
+            background-color: rgba(255,255,255,0.05);
+            border: 1px dashed #444;
+            padding: 5px;
+        }
+        
+        .ad-banner {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
+            margin: 0 auto;
+            display: block;
+            text-align: center;
         }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+        
+        .partidos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
         }
-        th {
-            background-color: #f2f2f2;
+        
+        .partido {
+            background-color: #232323;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .partido:hover {
+            background-color: #333;
+        }
+        
+        .partido h3 {
+            margin-top: 0;
+            color: #f1c40f;
+        }
+        
+        .partido .tiempo {
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .partido video {
+            width: 100%;
+            display: none;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+        
+        /* Anuncio bajo cada partido */
+        .partido-ad-container {
+            margin-top: 10px;
+            min-height: 90px;
+            background-color: rgba(255,255,255,0.05);
+            border: 1px dashed #444;
+            padding: 5px;
+            text-align: center;
+        }
+        
+        footer {
+            background-color: #232323;
+            text-align: center;
+            padding: 15px;
+            margin-top: 30px;
+            color: #888;
+        }
+        
+        .partido.active {
+            border: 2px solid #f1c40f;
+        }
+        
+        /* Anuncio flotante */
+        .ad-flotante {
+            position: fixed;
+            z-index: 1000;
+            background: rgba(0,0,0,0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+        }
+        
+        .ad-flotante-derecha {
+            top: 100px;
+            right: 20px;
+            width: 300px;
+            height: 250px;
+        }
+        
+        .ad-flotante-izquierda {
+            top: 100px;
+            left: 20px;
+            width: 300px;
+            height: 250px;
+        }
+        
+        .ad-flotante-centro {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 300px;
+            display: none;
+        }
+        
+        .cerrar-ad {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #f1c40f;
+            color: black;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
             font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
-        tr:hover {
-            background-color: #f5f5f5;
+        
+        iframe {
+            border: 0;
+        }
+        
+        /* Espacios para anuncios directos */
+        .ad-direct {
+            width: 100%;
+            margin: 20px auto;
+            min-height: 90px;
         }
     </style>
 </head>
 <body>
-    <h1>Sistema de Gestión de Cuentas</h1>
-    
-    <div class="tabs">
-        <button class="tab-button active" onclick="openTab(event, 'cuentaCompleta')">Cuenta Completa</button>
-        <button class="tab-button" onclick="openTab(event, 'perfilIndividual')">Perfil Individual</button>
-        <button class="tab-button" onclick="openTab(event, 'comprarPerfil')">Comprar Perfil</button>
-        <button class="tab-button" onclick="openTab(event, 'panel')">Panel de Gestión</button>
-    </div>
-    
-    <!-- Pestaña de Cuenta Completa -->
-    <div id="cuentaCompleta" class="tab-content" style="display: block;">
-        <h2>Registro de Cuenta Completa</h2>
-        <form id="cuentaCompletaForm">
-            <div class="form-group">
-                <label for="correo">Correo Electrónico:</label>
-                <input type="email" id="correo" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="cantidad_perfiles">Cantidad de Perfiles:</label>
-                <input type="number" id="cantidad_perfiles" min="1" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="fecha_vencimiento">Fecha de Vencimiento:</label>
-                <input type="date" id="fecha_vencimiento" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="plataforma">Plataforma:</label>
-                <select id="plataforma" required>
-                    <option value="">Seleccione una plataforma</option>
-                    <option value="Netflix">Netflix</option>
-                    <option value="Disney+">Disney+</option>
-                    <option value="HBO Max">HBO Max</option>
-                    <option value="Amazon Prime">Amazon Prime</option>
-                    <option value="Spotify">Spotify</option>
-                    <option value="YouTube Premium">YouTube Premium</option>
-                    <option value="Otra">Otra</option>
-                </select>
-            </div>
-            
-            <button type="submit">Registrar Cuenta</button>
-        </form>
-    </div>
-    
-    <!-- Pestaña de Perfil Individual -->
-    <div id="perfilIndividual" class="tab-content">
-        <h2>Registro de Perfil Individual</h2>
-        <form id="perfilIndividualForm">
-            <div class="form-group">
-                <label for="nombre_cliente">Nombre del Cliente:</label>
-                <input type="text" id="nombre_cliente" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="perfil_cliente">Perfil del Cliente:</label>
-                <input type="text" id="perfil_cliente" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="pin_cliente">PIN del Cliente (opcional):</label>
-                <input type="text" id="pin_cliente">
-            </div>
-            
-            <div class="form-group">
-                <label for="correo_cuenta">Correo de la Cuenta:</label>
-                <input type="email" id="correo_cuenta" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="contraseña_cuenta">Contraseña de la Cuenta:</label>
-                <input type="password" id="contraseña_cuenta" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="fecha_vencimiento_perfil">Fecha de Vencimiento:</label>
-                <input type="date" id="fecha_vencimiento_perfil" required>
-            </div>
-            
-            <button type="submit">Registrar Perfil</button>
-        </form>
-    </div>
-    
-    <!-- Nueva Pestaña de Comprar Perfil -->
-    <div id="comprarPerfil" class="tab-content">
-        <h2>Comprar Perfil para Cliente</h2>
-        <form id="comprarPerfilForm">
-            <div class="form-group">
-                <label for="cliente_compra">Nombre del Cliente:</label>
-                <input type="text" id="cliente_compra" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="plataforma_compra">Plataforma:</label>
-                <select id="plataforma_compra" required>
-                    <option value="">Seleccione una plataforma</option>
-                    <option value="Netflix">Netflix</option>
-                    <option value="Disney+">Disney+</option>
-                    <option value="HBO Max">HBO Max</option>
-                    <option value="Amazon Prime">Amazon Prime</option>
-                    <option value="Spotify">Spotify</option>
-                    <option value="YouTube Premium">YouTube Premium</option>
-                    <option value="Otra">Otra</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="cuenta_disponible">Cuenta Disponible:</label>
-                <select id="cuenta_disponible" required>
-                    <option value="">Cargando cuentas disponibles...</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="perfil_asignado">Nombre del Perfil:</label>
-                <input type="text" id="perfil_asignado" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="pin_asignado">PIN (opcional):</label>
-                <input type="text" id="pin_asignado">
-            </div>
-            
-            <div class="form-group">
-                <label for="fecha_compra">Fecha de Compra:</label>
-                <input type="date" id="fecha_compra" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="duracion_meses">Duración en Meses:</label>
-                <input type="number" id="duracion_meses" min="1" value="1" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="precio_compra">Precio:</label>
-                <input type="number" id="precio_compra" min="0" step="0.01" required>
-            </div>
-            
-            <button type="submit">Registrar Compra</button>
-        </form>
-    </div>
-    
-    <!-- Pestaña del Panel de Gestión -->
-    <div id="panel" class="tab-content">
-        <h2>Panel de Gestión</h2>
+    <div class="container">
+        <header>
+            <h1>Partidos en Vivo</h1>
+        </header>
         
-        <div class="section">
-            <h3>Cuentas Completas</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Correo</th>
-                        <th>Cantidad de Perfiles</th>
-                        <th>Fecha de Vencimiento</th>
-                        <th>Plataforma</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaCuentas">
-                    <!-- Aquí se cargarán las cuentas desde JavaScript -->
-                </tbody>
-            </table>
+        <!-- Anuncio Superior (banner) -->
+        <div class="ad-container" id="ad-top">
+            <!-- ANUNCIO BANNER SUPERIOR -->
+            <div class="ad-banner">
+                <script type="text/javascript">
+                    atOptions = {
+                        'key': 'b330ccd204185aee9ef640adccf896d2',
+                        'format': 'iframe',
+                        'height': 90,
+                        'width': 728,
+                        'params': {}
+                    };
+                    document.write('<scr' + 'ipt type="text/javascript" src="//www.highperformanceformat.com/b330ccd204185aee9ef640adccf896d2/invoke.js"></scr' + 'ipt>');
+                </script>
+            </div>
         </div>
         
-        <div class="section">
-            <h3>Perfiles Vendidos</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre del Cliente</th>
-                        <th>Perfil</th>
-                        <th>PIN</th>
-                        <th>Correo de la Cuenta</th>
-                        <th>Contraseña</th>
-                        <th>Fecha de Vencimiento</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaPerfiles">
-                    <!-- Aquí se cargarán los perfiles desde JavaScript -->
-                </tbody>
-            </table>
+        <!-- Anuncio Directo -->
+        <div class="ad-direct">
+            <script type='text/javascript' src='//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js'></script>
         </div>
         
-        <div class="section">
-            <h3>Compras de Perfiles</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Cliente</th>
-                        <th>Plataforma</th>
-                        <th>Perfil</th>
-                        <th>Cuenta</th>
-                        <th>Fecha de Compra</th>
-                        <th>Fecha de Vencimiento</th>
-                        <th>Precio</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaCompras">
-                    <!-- Aquí se cargarán las compras desde JavaScript -->
-                </tbody>
-            </table>
+        <div class="partidos">
+            <div class="partido" onclick="cargarPartido(this, 'https://agvyby.fubohd.com:443/sporttv1/index.m3u8?token=500e1d2e2e92e774a30f9bac162319ac3f0a8dac-e8-1741992641-1741956641')">
+                <h3>Superlig: Galatasaray vs Antalyaspor</h3>
+                <div class="tiempo">12:30</div>
+                <video controls></video>
+                <!-- Anuncio debajo del partido -->
+                <div class="partido-ad-container">
+                    <script type="text/javascript">
+                        atOptions = {
+                            'key': 'b330ccd204185aee9ef640adccf896d2',
+                            'format': 'iframe',
+                            'height': 90,
+                            'width': 728,
+                            'params': {}
+                        };
+                        document.write('<scr' + 'ipt type="text/javascript" src="//www.highperformanceformat.com/b330ccd204185aee9ef640adccf896d2/invoke.js"></scr' + 'ipt>');
+                    </script>
+                </div>
+            </div>
+
+            <div class="partido" onclick="cargarPartido(this, 'https://c2nvdxq.fubohd.com:443/espnplus1/mono.m3u8?token=c9c97b12a349bd2e0c622507be5588c369374c9a-4f-1741992546-1741956546')">
+                <h3>Segunda Division: Magdeburg vs Hamburger SV</h3>
+                <div class="tiempo">12:30</div>
+                <video controls></video>
+                <!-- Anuncio debajo del partido -->
+                <div class="partido-ad-container">
+                    <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
+                    <div id="container-2537ae2ea8b16bc9e554273a94dfd098-partido2"></div>
+                </div>
+            </div>
+
+            <div class="partido" onclick="cargarPartido(this, 'https://b2ZmaWNpYWw.fubohd.com:443/sky_bundesliga3/mono.m3u8?token=58936a3bb67a787d6349fa37e0fab8d8b1a8ef08-9c-1741992791-1741956791')">
+                <h3>Segunda Division: Schalke 04 vs Hannover 96</h3>
+                <div class="tiempo">12:30</div>
+                <video controls></video>
+                <!-- Anuncio debajo del partido -->
+                <div class="partido-ad-container">
+                    <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
+                </div>
+            </div>
         </div>
+        
+        <!-- Anuncio Container Central -->
+        <div class="ad-container">
+            <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
+            <div id="container-2537ae2ea8b16bc9e554273a94dfd098"></div>
+        </div>
+        
+        <!-- Anuncio Directo (adicional) -->
+        <div class="ad-container">
+            <iframe src="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" width="100%" height="250" frameborder="0" scrolling="no"></iframe>
+        </div>
+        
+        <!-- Anuncio Inferior -->
+        <div class="ad-container">
+            <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
+        </div>
+        
+        <!-- Anuncios Flotantes -->
+        <div id="ad-flotante-derecha" class="ad-flotante ad-flotante-derecha">
+            <div class="cerrar-ad" onclick="cerrarAnuncioFlotante('ad-flotante-derecha')">X</div>
+            <script type="text/javascript">
+                atOptions = {
+                    'key': 'b330ccd204185aee9ef640adccf896d2',
+                    'format': 'iframe',
+                    'height': 250,
+                    'width': 300,
+                    'params': {}
+                };
+                document.write('<scr' + 'ipt type="text/javascript" src="//www.highperformanceformat.com/b330ccd204185aee9ef640adccf896d2/invoke.js"></scr' + 'ipt>');
+            </script>
+        </div>
+        
+        <div id="ad-flotante-izquierda" class="ad-flotante ad-flotante-izquierda">
+            <div class="cerrar-ad" onclick="cerrarAnuncioFlotante('ad-flotante-izquierda')">X</div>
+            <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
+            <div id="container-2537ae2ea8b16bc9e554273a94dfd098-float-left"></div>
+        </div>
+        
+        <div id="ad-flotante-centro" class="ad-flotante ad-flotante-centro">
+            <div class="cerrar-ad" onclick="cerrarAnuncioFlotante('ad-flotante-centro')">X</div>
+            <iframe src="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" width="100%" height="100%" frameborder="0" scrolling="no"></iframe>
+        </div>
+        
+        <footer>
+            &copy; 2025 Partidos en Vivo - Todos los derechos reservados
+        </footer>
     </div>
-
-    <script type="module">
-        // Configuración de Supabase
-        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-        const SUPABASE_URL = "https://vdsdtouiokgvzrscaroe.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkc2R0b3Vpb2tndnpyc2Nhcm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTU1NjQsImV4cCI6MjA1Njc5MTU2NH0.zZ_PsL3vXmNNaaWWu9yHGdYn7vfYhzH4jpAwyG9tJqA";
-
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Funcionalidad para las pestañas
-        window.openTab = function(evt, tabName) {
-            var i, tabContent, tabButtons;
+    
+    <script>
+        // Variable para mantener la instancia actual de HLS
+        let currentHls = null;
+        let lastActivePartido = null;
+        
+        // Aseguramos que los bloqueadores de anuncios no afecten
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarTodosLosAnuncios();
+            detectarBloqueadorAnuncios();
             
-            // Ocultar todos los contenidos de pestañas
-            tabContent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabContent.length; i++) {
-                tabContent[i].style.display = "none";
-            }
-            
-            // Desactivar todos los botones de pestañas
-            tabButtons = document.getElementsByClassName("tab-button");
-            for (i = 0; i < tabButtons.length; i++) {
-                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
-            }
-            
-            // Mostrar la pestaña actual y activar el botón
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
-            
-            // Acciones específicas según la pestaña
-            if (tabName === "panel") {
-                cargarCuentas();
-                cargarPerfiles();
-                cargarCompras();
-            } else if (tabName === "comprarPerfil") {
-                cargarCuentasDisponibles();
-            }
-        };
-
-        // Funcionalidad para la página de cuenta completa
-        document.getElementById("cuentaCompletaForm").addEventListener("submit", async function(event) {
-            event.preventDefault();
-
-            // Obtener los valores del formulario
-            const correo = document.getElementById("correo").value;
-            const cantidad_perfiles = parseInt(document.getElementById("cantidad_perfiles").value);
-            const fecha_vencimiento = document.getElementById("fecha_vencimiento").value;
-            const plataforma = document.getElementById("plataforma").value;
-
-            try {
-                // Insertar en Supabase
-                const { data, error } = await supabase
-                    .from("cuentas_completas")
-                    .insert([{
-                        correo,
-                        cantidad_perfiles,
-                        fecha_vencimiento,
-                        plataforma
-                    }]);
-
-                if (error) throw error;
-
-                alert("Cuenta registrada correctamente.");
-                this.reset(); // Limpiar el formulario
-            } catch (error) {
-                console.error("Error al registrar cuenta:", error);
-                alert("Error al registrar la cuenta: " + error.message);
-            }
+            // Mostrar anuncio flotante central después de 3 segundos
+            setTimeout(function() {
+                document.getElementById('ad-flotante-centro').style.display = 'block';
+            }, 3000);
         });
-
-        // Funcionalidad para la página de perfil individual
-        document.getElementById("perfilIndividualForm").addEventListener("submit", async function(event) {
-            event.preventDefault();
-
-            // Obtener los valores del formulario
-            const nombre_cliente = document.getElementById("nombre_cliente").value;
-            const perfil_cliente = document.getElementById("perfil_cliente").value;
-            const pin_cliente = document.getElementById("pin_cliente").value || null;
-            const correo_cuenta = document.getElementById("correo_cuenta").value;
-            const contraseña_cuenta = document.getElementById("contraseña_cuenta").value;
-            const fecha_vencimiento = document.getElementById("fecha_vencimiento_perfil").value;
-
-            try {
-                // Primero, verificar si la cuenta existe y tiene perfiles disponibles
-                const { data: cuentaData, error: cuentaError } = await supabase
-                    .from("cuentas_completas")
-                    .select("id, cantidad_perfiles")
-                    .eq("correo", correo_cuenta)
-                    .single();
-
-                if (cuentaError) {
-                    if (cuentaError.code === 'PGRST116') {
-                        alert("La cuenta con este correo no existe. Por favor, registre primero la cuenta completa.");
-                        return;
+        
+        function cerrarAnuncioFlotante(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+        
+        function cargarTodosLosAnuncios() {
+            // Reintentar cargar los anuncios
+            setTimeout(function() {
+                // Primera carga de anuncios banner
+                var script1 = document.createElement('script');
+                script1.src = "//www.highperformanceformat.com/b330ccd204185aee9ef640adccf896d2/invoke.js";
+                document.getElementById('ad-top').appendChild(script1);
+                
+                // Cargar anuncio popunder
+                var script2 = document.createElement('script');
+                script2.src = "//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js";
+                document.body.appendChild(script2);
+                
+                // Asegurarse de que los anuncios por partido también se cargan
+                cargarAnunciosPorPartido();
+            }, 1000);
+        }
+        
+        function cargarAnunciosPorPartido() {
+            // Intentar cargar anuncios en cada partido
+            document.querySelectorAll('.partido-ad-container').forEach((container, index) => {
+                if (index % 3 === 0) {
+                    var script = document.createElement('script');
+                    script.src = "//www.highperformanceformat.com/b330ccd204185aee9ef640adccf896d2/invoke.js";
+                    container.appendChild(script);
+                } else if (index % 3 === 1) {
+                    var script = document.createElement('script');
+                    script.setAttribute('async', 'async');
+                    script.setAttribute('data-cfasync', 'false');
+                    script.src = "//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js";
+                    container.appendChild(script);
+                    
+                    var div = document.createElement('div');
+                    div.id = "container-2537ae2ea8b16bc9e554273a94dfd098-partido-" + index;
+                    container.appendChild(div);
+                } else {
+                    var script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    script.src = '//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js';
+                    container.appendChild(script);
+                }
+            });
+        }
+        
+        function detectarBloqueadorAnuncios() {
+            // Comprobar si los anuncios están bloqueados
+            setTimeout(function() {
+                const adContainers = document.querySelectorAll('.ad-container');
+                let adsVisible = false;
+                
+                adContainers.forEach(container => {
+                    // Si el contenedor tiene contenido visible, hay anuncios
+                    if (container.offsetHeight > 10 && container.innerHTML.trim() !== '') {
+                        adsVisible = true;
                     }
-                    throw cuentaError;
-                }
-
-                if (cuentaData.cantidad_perfiles <= 0) {
-                    alert("No hay perfiles disponibles en esta cuenta.");
-                    return;
-                }
-
-                // Insertar en tabla de perfiles vendidos
-                const { data, error } = await supabase
-                    .from("perfiles_vendidos")
-                    .insert([{
-                        nombre_cliente,
-                        perfil_cliente,
-                        pin_cliente,
-                        correo_cuenta,
-                        contraseña_cuenta,
-                        fecha_vencimiento
-                    }]);
-
-                if (error) throw error;
-
-                // Actualizar la cantidad de perfiles disponibles en la cuenta completa
-                const { data: updatedData, error: updateError } = await supabase
-                    .from("cuentas_completas")
-                    .update({ cantidad_perfiles: cuentaData.cantidad_perfiles - 1 })
-                    .eq("id", cuentaData.id);
-
-                if (updateError) throw updateError;
-
-                alert("Perfil registrado correctamente y stock actualizado.");
-                this.reset(); // Limpiar el formulario
-                
-                // Si estamos en la pestaña del panel, actualizamos las tablas
-                if (document.getElementById("panel").style.display === "block") {
-                    cargarCuentas();
-                    cargarPerfiles();
-                }
-                
-            } catch (error) {
-                console.error("Error al registrar perfil:", error);
-                alert("Error al registrar el perfil: " + error.message);
-            }
-        });
-
-        // Funcionalidad para la página de comprar perfil
-        document.getElementById("comprarPerfilForm").addEventListener("submit", async function(event) {
-            event.preventDefault();
-
-            // Obtener los valores del formulario
-            const cliente = document.getElementById("cliente_compra").value;
-            const plataforma = document.getElementById("plataforma_compra").value;
-            const cuenta_id = document.getElementById("cuenta_disponible").value;
-            const perfil = document.getElementById("perfil_asignado").value;
-            const pin = document.getElementById("pin_asignado").value || null;
-            const fecha_compra = document.getElementById("fecha_compra").value;
-            const duracion_meses = parseInt(document.getElementById("duracion_meses").value);
-            const precio = parseFloat(document.getElementById("precio_compra").value);
-            
-            // Calcular fecha de vencimiento
-            const fecha_vencimiento = new Date(fecha_compra);
-            fecha_vencimiento.setMonth(fecha_vencimiento.getMonth() + duracion_meses);
-            const fecha_vencimiento_str = fecha_vencimiento.toISOString().split('T')[0];
-
-            try {
-                // Obtener información de la cuenta
-                const { data: cuentaData, error: cuentaError } = await supabase
-                    .from("cuentas_completas")
-                    .select("*")
-                    .eq("id", cuenta_id)
-                    .single();
-
-                if (cuentaError) throw cuentaError;
-                
-                if (cuentaData.cantidad_perfiles <= 0) {
-                    alert("No hay perfiles disponibles en esta cuenta.");
-                    return;
-                }
-                
-                // Registrar la compra
-                const { data: compraData, error: compraError } = await supabase
-                    .from("compras_perfiles")
-                    .insert([{
-                        cliente,
-                        plataforma,
-                        cuenta_id,
-                        perfil,
-                        pin,
-                        fecha_compra,
-                        fecha_vencimiento: fecha_vencimiento_str,
-                        duracion_meses,
-                        precio,
-                        correo_cuenta: cuentaData.correo,
-                        contraseña_cuenta: cuentaData.contraseña || "********" // Ajusta según tu estructura
-                    }]);
-                
-                if (compraError) throw compraError;
-                
-                // También registrar en perfiles_vendidos para mantener consistencia
-                const { data: perfilData, error: perfilError } = await supabase
-                    .from("perfiles_vendidos")
-                    .insert([{
-                        nombre_cliente: cliente,
-                        perfil_cliente: perfil,
-                        pin_cliente: pin,
-                        correo_cuenta: cuentaData.correo,
-                        contraseña_cuenta: cuentaData.contraseña || "********",
-                        fecha_vencimiento: fecha_vencimiento_str
-                    }]);
-                
-                if (perfilError) throw perfilError;
-                
-                // Actualizar la cantidad de perfiles disponibles
-                const { data: updatedData, error: updateError } = await supabase
-                    .from("cuentas_completas")
-                    .update({ cantidad_perfiles: cuentaData.cantidad_perfiles - 1 })
-                    .eq("id", cuentaData.id);
-                
-                if (updateError) throw updateError;
-                
-                alert("Compra de perfil registrada correctamente y stock actualizado.");
-                this.reset();
-                cargarCuentasDisponibles();
-                
-                // Si estamos en la pestaña del panel, actualizamos las tablas
-                if (document.getElementById("panel").style.display === "block") {
-                    cargarCuentas();
-                    cargarPerfiles();
-                    cargarCompras();
-                }
-                
-            } catch (error) {
-                console.error("Error al registrar compra:", error);
-                alert("Error al registrar la compra: " + error.message);
-            }
-        });
-
-        // Cargar cuentas disponibles para el formulario de compra
-        async function cargarCuentasDisponibles() {
-            try {
-                const { data, error } = await supabase
-                    .from("cuentas_completas")
-                    .select("*")
-                    .gt("cantidad_perfiles", 0);
-                
-                if (error) throw error;
-                
-                const selectCuentas = document.getElementById("cuenta_disponible");
-                selectCuentas.innerHTML = "";
-                
-                if (data.length === 0) {
-                    selectCuentas.innerHTML = '<option value="">No hay cuentas disponibles</option>';
-                    return;
-                }
-                
-                selectCuentas.innerHTML = '<option value="">Seleccione una cuenta</option>';
-                
-                data.forEach(cuenta => {
-                    // Filtrar por plataforma seleccionada
-                    const option = document.createElement("option");
-                    option.value = cuenta.id;
-                    option.textContent = `${cuenta.correo} (${cuenta.plataforma}) - ${cuenta.cantidad_perfiles} perfiles disponibles`;
-                    selectCuentas.appendChild(option);
                 });
                 
-            } catch (error) {
-                console.error("Error al cargar cuentas disponibles:", error);
-                alert("Error al cargar las cuentas disponibles: " + error.message);
-            }
+                if (!adsVisible) {
+                    console.log("Posible bloqueador de anuncios detectado");
+                    // Intentar cargar alternativas
+                    cargarAnunciosAlternativos();
+                }
+            }, 3000);
         }
         
-        // Filtrar cuentas por plataforma seleccionada
-        document.getElementById("plataforma_compra").addEventListener("change", function() {
-            const plataforma = this.value;
-            if (!plataforma) {
-                cargarCuentasDisponibles();
-                return;
+        function cargarAnunciosAlternativos() {
+            // Intenta con otra red de anuncios o método alternativo
+            const adContainers = document.querySelectorAll('.ad-container, .partido-ad-container');
+            
+            adContainers.forEach((container, index) => {
+                // Crear un iframe directo como alternativa
+                const iframe = document.createElement('iframe');
+                iframe.src = "https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd";
+                iframe.width = "100%";
+                iframe.height = "90";
+                iframe.frameBorder = "0";
+                container.appendChild(iframe);
+            });
+            
+            // También actualizar los anuncios flotantes
+            document.querySelectorAll('.ad-flotante').forEach(flotante => {
+                flotante.innerHTML = '<div class="cerrar-ad" onclick="cerrarAnuncioFlotante(\'' + flotante.id + '\')">X</div>';
+                const iframe = document.createElement('iframe');
+                iframe.src = "https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd";
+                iframe.width = "100%";
+                iframe.height = "100%";
+                iframe.frameBorder = "0";
+                flotante.appendChild(iframe);
+            });
+        }
+        
+        function cargarPartido(elemento, url) {
+            // Mostrar anuncio flotante central al cargar un partido
+            document.getElementById('ad-flotante-centro').style.display = 'block';
+            
+            // Restablecer estilo del partido anterior
+            if (lastActivePartido) {
+                lastActivePartido.classList.remove('active');
+                const lastVideo = lastActivePartido.querySelector('video');
+                lastVideo.pause();
+                lastVideo.style.display = 'none';
+                
+                // Destruir la instancia anterior de HLS
+                if (currentHls) {
+                    currentHls.destroy();
+                    currentHls = null;
+                }
             }
             
-            filtrarCuentasPorPlataforma(plataforma);
-        });
+            // Activar el partido actual
+            elemento.classList.add('active');
+            lastActivePartido = elemento;
+            
+            // Obtener el elemento de video dentro del partido
+            const video = elemento.querySelector('video');
+            
+            // Intentar cargar popunders antes de reproducir el video
+            cargarPopunder();
+            
+            // Activar otros tipos de anuncios
+            activarAnunciosPorClick();
+            
+            // Reproducir el video
+            if (Hls.isSupported()) {
+                currentHls = new Hls();
+                currentHls.loadSource(url);
+                currentHls.attachMedia(video);
+                currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    video.style.display = 'block';
+                    video.play().catch(e => {
+                        console.log('Error al iniciar reproducción automática:', e);
+                    });
+                });
+                
+                currentHls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        console.error('Error fatal de HLS:', data);
+                        alert('Error al cargar el stream. Por favor, intenta con otro partido.');
+                    }
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.style.display = 'block';
+                video.addEventListener('loadedmetadata', () => {
+                    video.play().catch(e => console.log('Error al reproducir en Safari:', e));
+                });
+            } else {
+                alert('Tu navegador no soporta la reproducción de estos videos');
+            }
+            
+            // Desplazarse hasta el partido seleccionado
+            elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         
-        async function filtrarCuentasPorPlataforma(plataforma) {
+        function cargarPopunder() {
+            // Método 1: Cargar script de popunder
             try {
-                const { data, error } = await supabase
-                    .from("cuentas_completas")
-                    .select("*")
-                    .eq("plataforma", plataforma)
-                    .gt("cantidad_perfiles", 0);
-                
-                if (error) throw error;
-                
-                const selectCuentas = document.getElementById("cuenta_disponible");
-                selectCuentas.innerHTML = "";
-                
-                if (data.length === 0) {
-                    selectCuentas.innerHTML = `<option value="">No hay cuentas de ${plataforma} disponibles</option>`;
-                    return;
+                var script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = '//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js';
+                document.body.appendChild(script);
+            } catch (e) {
+                console.error("Error al cargar popunder:", e);
+            }
+            
+            // Método 2: Cargar iframe popunder
+            try {
+                var iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = 'https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd';
+                document.body.appendChild(iframe);
+            } catch (e) {
+                console.log("Error al cargar iframe popunder");
+            }
+        }
+        
+        function activarAnunciosPorClick() {
+            // Activar todos los anuncios con un solo clic
+            document.querySelectorAll('.ad-container, .partido-ad-container').forEach(container => {
+                // Forzar carga de anuncios
+                container.style.opacity = '0.99';
+                setTimeout(() => {
+                    container.style.opacity = '1';
+                }, 100);
+            });
+            
+            // Asegurarse de que los anuncios flotantes estén visibles
+            document.querySelectorAll('.ad-flotante').forEach(flotante => {
+                if (flotante.id !== 'ad-flotante-centro') {
+                    flotante.style.display = 'block';
                 }
-                
-                selectCuentas.innerHTML = `<option value="">Seleccione una cuenta de ${plataforma}</option>`;
-                
-                data.forEach(cuenta => {
-                    const option = document.createElement("option");
-                    option.value = cuenta.id;
-                    option.textContent = `${cuenta.correo} - ${cuenta.cantidad_perfiles} perfiles disponibles`;
-                    selectCuentas.appendChild(option);
-                });
-                
-            } catch (error) {
-                console.error("Error al filtrar cuentas:", error);
-                alert("Error al filtrar las cuentas: " + error.message);
-            }
-        }
-
-        // Función para cargar cuentas completas
-        async function cargarCuentas() {
+            });
+            
+            // Intentar cargar scripts nuevamente
             try {
-                const { data, error } = await supabase.from("cuentas_completas").select("*");
-                if (error) throw error;
-
-                const tablaCuentas = document.getElementById("tablaCuentas");
-                if (!tablaCuentas) return;
-
-                tablaCuentas.innerHTML = ""; // Limpiar la tabla antes de llenar
-
-                data.forEach((cuenta) => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${cuenta.id}</td>
-                        <td>${cuenta.correo}</td>
-                        <td>${cuenta.cantidad_perfiles}</td>
-                        <td>${cuenta.fecha_vencimiento}</td>
-                        <td>${cuenta.plataforma}</td>
-                        <td>
-                            <button onclick="eliminarCuenta(${cuenta.id})">Eliminar</button>
-                            <button onclick="reemplazarCuenta(${cuenta.id})">Reemplazar</button>
-                        </td>
-                    `;
-                    tablaCuentas.appendChild(row);
-                });
-            } catch (error) {
-                console.error("Error al obtener cuentas:", error);
-                alert("Error al cargar las cuentas: " + error.message);
-            }
-        }
-
-        // Función para cargar perfiles vendidos
-        async function cargarPerfiles() {
-            try {
-                const { data, error } = await supabase.from("perfiles_vendidos").select("*");
-                if (error) throw error;
-
-                const tablaPerfiles = document.getElementById("tablaPerfiles");
-                if (!tablaPerfiles) return;
-
-                tablaPerfiles.innerHTML = ""; // Limpiar la tabla antes de llenar
-
-                data.forEach((perfil) => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${perfil.id}</td>
-                        <td>${perfil.nombre_cliente}</td>
-                        <td>${perfil.perfil_cliente}</td>
-                        <td>${perfil.pin_cliente || "N/A"}</td>
-                        <td>${perfil.correo_cuenta}</td>
-                        <td>${perfil.contraseña_cuenta}</td>
-                        <td>${perfil.fecha_vencimiento}</td>
-                        <td>
-                            <button onclick="eliminarPerfil(${perfil.id})">Eliminar</button>
-                            <button onclick="reemplazarPerfil(${perfil.id})">Reemplazar</button>
-                        </td>
-                    `;
-                    tablaPerfiles.appendChild(row);
-                });
-            } catch (error) {
-                console.error("Error al obtener perfiles:", error);
-                alert("Error al cargar los perfiles: " + error.message);
+                // Cargar script container
+                var scriptContainer = document.createElement('script');
+                scriptContainer.async = true;
+                scriptContainer.setAttribute('data-cfasync', 'false');
+                scriptContainer.src = '//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js';
+                document.body.appendChild(scriptContainer);
+                
+                // Cargar otro script de anuncios
+                var scriptAds = document.createElement('script');
+                scriptAds.type = 'text/javascript';
+                scriptAds.src = '//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js';
+                document.body.appendChild(scriptAds);
+            } catch (e) {
+                console.error("Error al cargar scripts adicionales:", e);
             }
         }
         
-        // Función para cargar compras de perfiles
-        async function cargarCompras() {
-            try {
-                const { data, error } = await supabase.from("compras_perfiles").select("*");
-                if (error) throw error;
-
-                const tablaCompras = document.getElementById("tablaCompras");
-                if (!tablaCompras) return;
-
-                tablaCompras.innerHTML = ""; // Limpiar la tabla antes de llenar
-
-                data.forEach((compra) => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${compra.id}</td>
-                        <td>${compra.cliente}</td>
-                        <td>${compra.plataforma}</td>
-                        <td>${compra.perfil}</td>
-                        <td>${compra.correo_cuenta}</td>
-                        <td>${compra.fecha_compra}</td>
-                        <td>${compra.fecha_vencimiento}</td>
-                        <td>${compra.precio.toFixed(2)}</td>
-                        <td>
-                            <button onclick="eliminarCompra(${compra.id})">Eliminar</button>
-                            <button onclick="renovarCompra(${compra.id})">Renovar</button>
-                        </td>
-                    `;
-                    tablaCompras.appendChild(row);
-                });
-            } catch (error) {
-                console.error("Error al obtener compras:", error);
-                alert("Error al cargar las compras: " + error.message);
-            }
-        }
-
-        // Función para eliminar una cuenta
-        window.eliminarCuenta = async function(id) {
-            if (!confirm("¿Está seguro que desea eliminar esta cuenta?")) return;
-
-            try {
-                const { error } = await supabase.from("cuentas_completas").delete().match({ id });
-                if (error) throw error;
-
-                alert("Cuenta eliminada correctamente.");
-                cargarCuentas(); // Recargar la tabla
-            } catch (error) {
-                console.error("Error al eliminar cuenta:", error);
-                alert("Error al eliminar la cuenta: " + error.message);
-            }
-        };
-
-        // Función para eliminar un perfil
-        window.eliminarPerfil = async function(id) {
-            if (!confirm("¿Está seguro que desea eliminar este perfil?")) return;
-
-            try {
-                const { error } = await supabase.from("perfiles_vendidos").delete().match({ id });
-                if (error) throw error;
-
-                alert("Perfil eliminado correctamente.");
-                cargarPerfiles(); // Recargar la tabla
-            } catch (error) {
-                console.error("Error al eliminar perfil:", error);
-                alert("Error al eliminar el perfil: " + error.message);
-            }
-        };
-        // Función para eliminar una compra
-window.eliminarCompra = async function(id) {
-    if (!confirm("¿Está seguro que desea eliminar esta compra?")) return;
-
-    try {
-        const { error } = await supabase.from("compras_perfiles").delete().match({ id });
-        if (error) {
-            alert("Hubo un error al eliminar la compra: " + error.message);
-        } else {
-            alert("Compra eliminada correctamente.");
-            // Aquí puedes agregar código para actualizar la interfaz de usuario, si es necesario
-        }
-    } catch (err) {
-        alert("Hubo un problema con la solicitud: " + err.message);
-    }
-};
-
-
-        // Función para reemplazar una cuenta
-        window.reemplazarCuenta = async function(id) {
-            const nuevoCorreo = prompt("Ingrese el nuevo correo de la cuenta:");
-            if (!nuevoCorreo) return;
-
-            try {
-                const { error } = await supabase
-                    .from("cuentas_completas")
-                    .update({ correo: nuevoCorreo })
-                    .match({ id });
-
-                if (error) throw error;
-
-                alert("Cuenta actualizada correctamente.");
-                cargarCuentas(); // Recargar la tabla
-            } catch (error) {
-                console.error("Error al reemplazar cuenta:", error);
-                alert("Error al actualizar la cuenta: " + error.message);
-            }
-        };
-
-        // Función para reemplazar un perfil
-        window.reemplazarPerfil = async function(id) {
-            const nuevoPerfil = prompt("Ingrese el nuevo perfil del cliente:");
-            if (!nuevoPerfil) return;
-
-            try {
-                const { error } = await supabase
-                    .from("perfiles_vendidos")
-                    .update({ perfil_cliente: nuevoPerfil })
-                    .match({ id });
-
-                if (error) throw error;
-
-                alert("Perfil actualizado correctamente.");
-                cargarPerfiles(); // Recargar la tabla
-            } catch (error) {
-                console.error("Error al reemplazar perfil:", error);
-                alert("Error al actualizar el perfil: " + error.message);
-            }
-        };
+        // Inicializar la página
+        window.addEventListener('load', function() {
+            cargarTodosLosAnuncios();
+            
+            // Cargar anuncios después de 3 segundos para evitar bloqueos
+            setTimeout(activarAnunciosPorClick, 3000);
+            
+            // Mostrar anuncio flotante central después de 5 segundos
+            setTimeout(function() {
+                document.getElementById('ad-flotante-centro').style.display = 'block';
+            }, 5000);
+        });
     </script>
 </body>
 </html>
