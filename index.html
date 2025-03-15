@@ -6,49 +6,96 @@
     <title>Reproductor de Eventos en Vivo</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.0/hls.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; }
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #f8f9fa;
+            position: relative; 
+        }
         h1 { color: #333; text-align: center; margin-bottom: 20px; }
         
-        /* Lista horizontal */
-        .event-list-container {
+        .main-container {
+            display: flex;
+            gap: 20px;
             position: relative;
-            margin-bottom: 15px;
         }
+        
+        /* Lista vertical de eventos */
+        .events-sidebar {
+            width: 220px;
+            min-width: 220px;
+        }
+        
         .event-list { 
-            display: flex; 
-            overflow-x: auto;
-            padding: 10px 0;
-            gap: 15px;
-            scrollbar-width: thin;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
         }
         
         /* Estilo de cada evento como rectángulo */
         .event { 
-            padding: 12px 18px; 
+            padding: 12px; 
             background-color: #fff;
             border-radius: 6px; 
             cursor: pointer;
-            min-width: 140px;
-            text-align: center;
+            text-align: left;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border-left: 3px solid transparent;
         }
-        .event:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
-        .event.active { border-color: #007bff; background-color: #e0f0ff; }
+        .event:hover { 
+            transform: translateX(5px); 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); 
+        }
+        .event.active { 
+            border-left-color: #007bff; 
+            background-color: #e0f0ff; 
+        }
+        
+        /* Contenedor central con el video */
+        .content-area {
+            flex: 1;
+        }
         
         #videoContainer { 
-            margin: 0 0 15px 0; 
             background: #fff; 
             padding: 15px; 
             border-radius: 8px; 
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
             position: relative;
+            margin-bottom: 15px;
         }
-        video { width: 100%; background: #000; border-radius: 4px; }
-        .status { margin-top: 10px; font-style: italic; color: #666; }
         
-        /* Contenedores de anuncios */
+        video { 
+            width: 100%; 
+            background: #000; 
+            border-radius: 4px; 
+        }
+        
+        .status { 
+            margin-top: 10px; 
+            font-style: italic; 
+            color: #666; 
+        }
+        
+        /* Columna de anuncios derecha */
+        .ads-sidebar {
+            width: 300px;
+            min-width: 300px;
+        }
+        
+        .sidebar-ad {
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Anuncios en la columna principal */
         .ad-banner-top {
             margin-bottom: 15px;
             text-align: center;
@@ -61,29 +108,7 @@
             clear: both;
         }
         
-        .ad-container {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .ad-link {
-            display: inline-block;
-            padding: 8px 12px;
-            background-color: #f0f0f0;
-            color: #333;
-            text-decoration: none;
-            border-radius: 4px;
-            margin: 5px;
-            transition: background-color 0.3s;
-        }
-        .ad-link:hover {
-            background-color: #e0e0e0;
-        }
-        
-        /* Anuncios sobre el video */
+        /* Anuncio superpuesto al video */
         .video-overlay-ad {
             position: absolute;
             bottom: 70px;
@@ -96,20 +121,54 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
-        /* Contenedor para anuncios debajo del estado */
-        .status-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        /* Anuncio flotante */
+        .floating-ad {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 300px;
         }
         
-        /* Para dispositivos móviles */
-        @media (max-width: 768px) {
-            .ad-banner-top iframe {
-                width: 100% !important;
-                height: auto !important;
-                min-height: 50px;
+        .floating-ad .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            border-radius: 50%;
+        }
+        
+        .floating-ad .close-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .events-sidebar, .ads-sidebar {
+                width: 100%;
+                min-width: 100%;
+            }
+            
+            .event-list {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .event:hover {
+                transform: translateY(-5px);
             }
         }
     </style>
@@ -131,37 +190,54 @@
         <script type="text/javascript" src="//www.highperformanceformat.com/b330ccd204185aee9ef640adccf896d2/invoke.js"></script>
     </div>
     
-    <div class="event-list-container">
-        <div class="event-list" id="eventList"></div>
-    </div>
-    
-    <!-- Anuncio en línea entre eventos y video -->
-    <div class="ad-inline">
-        <script type='text/javascript' src='//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js'></script>
-    </div>
-    
-    <div id="videoContainer">
-        <video id="video" controls></video>
-        
-        <!-- Anuncio superpuesto sobre el video -->
-        <div class="video-overlay-ad">
-            <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank">Ver contenido premium</a>
+    <div class="main-container">
+        <!-- Barra lateral izquierda con lista de eventos -->
+        <div class="events-sidebar">
+            <h3>Lista de Eventos</h3>
+            <div class="event-list" id="eventList"></div>
+            
+            <!-- Anuncio en la barra lateral izquierda -->
+            <div class="sidebar-ad">
+                <script type='text/javascript' src='//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js'></script>
+            </div>
         </div>
         
-        <div class="status-container">
-            <div class="status" id="status">Seleccione un evento para comenzar</div>
+        <!-- Área central con el reproductor -->
+        <div class="content-area">
+            <div id="videoContainer">
+                <video id="video" controls></video>
+                
+                <!-- Anuncio superpuesto sobre el video -->
+                <div class="video-overlay-ad">
+                    <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank">Ver contenido premium</a>
+                </div>
+                
+                <div class="status" id="status">Seleccione un evento para comenzar</div>
+            </div>
             
-            <!-- Anuncio pequeño junto al estado -->
-            <div>
-                <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank" class="ad-link">Contenido recomendado</a>
+            <!-- Anuncio inline en el área de contenido -->
+            <div class="ad-inline">
+                <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
+            </div>
+        </div>
+        
+        <!-- Barra lateral derecha con anuncios -->
+        <div class="ads-sidebar">
+            <div class="sidebar-ad">
+                <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank">Ver anuncio</a>
+            </div>
+            
+            <div class="sidebar-ad">
+                <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
+                <div id="container-2537ae2ea8b16bc9e554273a94dfd098"></div>
             </div>
         </div>
     </div>
     
-    <!-- Anuncio contenedor debajo del video -->
-    <div class="ad-container">
-        <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
-        <div id="container-2537ae2ea8b16bc9e554273a94dfd098"></div>
+    <!-- Anuncio flotante -->
+    <div class="floating-ad" id="floatingAd">
+        <div class="close-btn" onclick="document.getElementById('floatingAd').style.display='none'">✕</div>
+        <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
     </div>
     
     <script>
@@ -186,14 +262,6 @@
             eventoElement.textContent = evento.titulo;
             eventoElement.addEventListener('click', () => reproducirEvento(index));
             eventList.appendChild(eventoElement);
-        });
-        
-        // Cargar script de anuncios adicional
-        window.addEventListener('load', function() {
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.src = '//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js';
-            document.body.appendChild(script);
         });
         
         function reproducirEvento(index) {
