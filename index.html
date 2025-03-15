@@ -67,6 +67,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
             position: relative;
             margin-bottom: 15px;
+            display: none; /* Oculto por defecto */
         }
         
         video { 
@@ -106,6 +107,12 @@
             margin: 15px 0;
             text-align: center;
             clear: both;
+        }
+        
+        /* Anuncio entre eventos */
+        .ad-between-events {
+            margin: 10px 0;
+            text-align: center;
         }
         
         /* Anuncio superpuesto al video */
@@ -151,6 +158,20 @@
             background: #f0f0f0;
         }
         
+        .back-to-events {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            display: none;
+        }
+        
+        .back-to-events:hover {
+            background: #e0e0e0;
+        }
+        
         /* Responsive */
         @media (max-width: 992px) {
             .main-container {
@@ -169,6 +190,14 @@
             
             .event:hover {
                 transform: translateY(-5px);
+            }
+            
+            .content-area.video-active .event-list {
+                display: none;
+            }
+            
+            .back-to-events {
+                display: block;
             }
         }
     </style>
@@ -203,7 +232,11 @@
         </div>
         
         <!-- Área central con el reproductor -->
-        <div class="content-area">
+        <div class="content-area" id="contentArea">
+            <div class="back-to-events" id="backToEvents" onclick="volverAListaEventos()">
+                ← Volver a lista de eventos
+            </div>
+            
             <div id="videoContainer">
                 <video id="video" controls></video>
                 
@@ -247,24 +280,52 @@
             { titulo: "Concierto", url: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" },
             { titulo: "Conferencia", url: "https://cdn-test.live-video.net/test.m3u8" },
             { titulo: "Festival", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-            { titulo: "Deportes", url: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" }
+            { titulo: "Deportes", url: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" },
+            { titulo: "Fútbol Internacional", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+            { titulo: "Recital", url: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" },
+            { titulo: "Charla TED", url: "https://cdn-test.live-video.net/test.m3u8" },
+            { titulo: "Partido Amistoso", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+            { titulo: "Carrera", url: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" }
         ];
         
         const video = document.getElementById('video');
         const status = document.getElementById('status');
         const eventList = document.getElementById('eventList');
+        const videoContainer = document.getElementById('videoContainer');
+        const contentArea = document.getElementById('contentArea');
+        const backToEvents = document.getElementById('backToEvents');
         let hls = null;
         
-        // Crear la lista de eventos
+        // Crear la lista de eventos con anuncios intercalados
         eventos.forEach((evento, index) => {
             const eventoElement = document.createElement('div');
             eventoElement.className = 'event';
             eventoElement.textContent = evento.titulo;
             eventoElement.addEventListener('click', () => reproducirEvento(index));
             eventList.appendChild(eventoElement);
+            
+            // Insertar anuncio después de cada 3 eventos
+            if ((index + 1) % 3 === 0 && index < eventos.length - 1) {
+                const adDiv = document.createElement('div');
+                adDiv.className = 'ad-between-events';
+                adDiv.innerHTML = '<script type="text/javascript" src="//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js"><\/script>';
+                eventList.appendChild(adDiv);
+            }
         });
         
         function reproducirEvento(index) {
+            // Mostrar el contenedor de video
+            videoContainer.style.display = 'block';
+            
+            // En móvil, esconder la lista de eventos y mostrar el botón de volver
+            if (window.innerWidth <= 992) {
+                contentArea.classList.add('video-active');
+                backToEvents.style.display = 'block';
+                
+                // Desplazar al inicio del reproductor
+                videoContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+            
             // Actualizar estilo de selección
             document.querySelectorAll('.event').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.event')[index].classList.add('active');
@@ -294,13 +355,38 @@
                 // Soporte nativo para Safari
                 video.src = evento.url;
                 video.addEventListener('loadedmetadata', () => {
-                    status.textContent = `Reproduciendo: ${evento.titulo}`;
+                   status.textContent = `Reproduciendo: ${evento.titulo}`;
                     video.play();
                 });
             } else {
                 status.textContent = "Su navegador no es compatible con la reproducción HLS.";
             }
         }
+        
+        function volverAListaEventos() {
+            // Ocultar reproductor y mostrar lista de eventos
+            contentArea.classList.remove('video-active');
+            backToEvents.style.display = 'none';
+            
+            // Detener reproducción
+            if (video) {
+                video.pause();
+            }
+            
+            // En móvil, desplazar hacia arriba para ver la lista completa
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Ajustar la visualización si cambia el tamaño de la ventana
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 992) {
+                contentArea.classList.remove('video-active');
+                backToEvents.style.display = 'none';
+            } else if (videoContainer.style.display === 'block') {
+                contentArea.classList.add('video-active');
+                backToEvents.style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>
