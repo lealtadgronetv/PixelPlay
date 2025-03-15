@@ -116,21 +116,33 @@
             margin-bottom: 15px;
             text-align: center;
             overflow: hidden;
+            background: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
         .ad-inline {
             margin: 15px 0;
             text-align: center;
             clear: both;
+            background: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
         /* Anuncio entre eventos */
         .ad-between-events {
             margin: 10px 0;
             text-align: center;
+            background: #fff;
+            padding: 5px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
-        /* Anuncio superpuesto al video */
+        /* Anuncios superpuestos sobre el video */
         .video-overlay-ad {
             position: absolute;
             bottom: 70px;
@@ -143,7 +155,31 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
-        /* Anuncio flotante */
+        .video-overlay-ad-top {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.8);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .video-overlay-ad-bottom {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.8);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        /* Anuncios flotantes */
         .floating-ad {
             position: fixed;
             bottom: 20px;
@@ -156,10 +192,33 @@
             max-width: 300px;
         }
         
-        /* Segundo anuncio flotante */
         .floating-ad-2 {
             position: fixed;
             bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 250px;
+        }
+        
+        .floating-ad-3 {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 250px;
+        }
+        
+        .floating-ad-4 {
+            position: fixed;
+            top: 20px;
             left: 20px;
             background: white;
             padding: 15px;
@@ -181,6 +240,26 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             z-index: 1001;
             display: none;
+            width: 320px;
+            height: 300px;
+        }
+        
+        /* Anuncio de pantalla completa más grande */
+        .fullscreen-ad-large {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1002;
+            display: none;
+            width: 600px;
+            max-width: 90%;
+            height: 400px;
+            max-height: 80vh;
         }
         
         .close-btn {
@@ -194,10 +273,12 @@
             text-align: center;
             line-height: 20px;
             border-radius: 50%;
+            background: #f0f0f0;
+            z-index: 10;
         }
         
         .close-btn:hover {
-            background: #f0f0f0;
+            background: #e0e0e0;
         }
         
         .back-to-events {
@@ -212,6 +293,67 @@
         
         .back-to-events:hover {
             background: #e0e0e0;
+        }
+        
+        /* Anuncio antes de la reprodución (preroll) */
+        #prerollAd {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            color: white;
+        }
+        
+        .preroll-content {
+            text-align: center;
+            width: 100%;
+            max-width: 728px;
+        }
+        
+        .preroll-content .ad-countdown {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .preroll-skip {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: none;
+        }
+        
+        /* Atribuciones de adblock detector */
+        .adb-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        .adb-content {
+            text-align: center;
+            padding: 30px;
+            background: #222;
+            border-radius: 10px;
+            max-width: 500px;
         }
         
         /* Responsive */
@@ -271,6 +413,12 @@
             <div class="sidebar-ad">
                 <script type='text/javascript' src='//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js'></script>
             </div>
+            
+            <!-- Anuncio adicional en la barra lateral izquierda -->
+            <div class="sidebar-ad">
+                <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
+                <div id="container-2537ae2ea8b16bc9e554273a94dfd098"></div>
+            </div>
         </div>
         
         <!-- Área central con el reproductor -->
@@ -299,11 +447,37 @@
             </div>
             
             <div id="videoContainer">
+                <!-- Anuncio preroll -->
+                <div id="prerollAd">
+                    <div class="preroll-content">
+                        <div class="ad-countdown">El video comenzará en <span id="prerollTimer">10</span> segundos</div>
+                        <script type="text/javascript">
+                            atOptions = {
+                                'key' : 'a55c7cdc78df0520f71c2b00e4046167',
+                                'format' : 'iframe',
+                                'height' : 300,
+                                'width' : 300,
+                                'params' : {}
+                            };
+                        </script>
+                        <script type="text/javascript" src="//www.highperformanceformat.com/a55c7cdc78df0520f71c2b00e4046167/invoke.js"></script>
+                        <div class="preroll-skip" id="prerollSkip">Saltar anuncio</div>
+                    </div>
+                </div>
+                
                 <video id="video" controls></video>
                 
-                <!-- Anuncio superpuesto sobre el video -->
+                <!-- Anuncios superpuestos sobre el video -->
                 <div class="video-overlay-ad">
-                    <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank">Ver contenido premium</a>
+                    <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank">Contenido Premium</a>
+                </div>
+                
+                <div class="video-overlay-ad-top">
+                    <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank">Suscribirse</a>
+                </div>
+                
+                <div class="video-overlay-ad-bottom">
+                    <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank">Ver sin anuncios</a>
                 </div>
                 
                 <div class="status" id="status">Seleccione un evento para comenzar</div>
@@ -313,12 +487,20 @@
             <div class="ad-inline">
                 <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
             </div>
+            
+            <!-- Anuncio adicional en el área de contenido -->
+            <div class="ad-inline">
+                <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
+                <div id="container-2537ae2ea8b16bc9e554273a94dfd098"></div>
+            </div>
         </div>
         
         <!-- Barra lateral derecha con anuncios -->
         <div class="ads-sidebar">
             <div class="sidebar-ad">
-                <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank">Ver anuncio</a>
+                <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank">
+                    <img src="https://via.placeholder.com/300x250" alt="Promoción especial" style="width:100%;">
+                </a>
             </div>
             
             <div class="sidebar-ad">
@@ -330,34 +512,74 @@
             <div class="sidebar-ad">
                 <script type='text/javascript' src='//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js'></script>
             </div>
+            
+            <!-- Anuncio adicional en la barra lateral -->
+            <div class="sidebar-ad">
+                <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
+            </div>
         </div>
     </div>
     
-    <!-- Anuncio flotante derecha -->
+    <!-- Anuncios flotantes en las cuatro esquinas -->
     <div class="floating-ad" id="floatingAd">
         <div class="close-btn" onclick="document.getElementById('floatingAd').style.display='none'">✕</div>
         <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
     </div>
     
-    <!-- Segundo anuncio flotante izquierda -->
     <div class="floating-ad-2" id="floatingAd2">
         <div class="close-btn" onclick="document.getElementById('floatingAd2').style.display='none'">✕</div>
         <script type='text/javascript' src='//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js'></script>
     </div>
     
-    <!-- Anuncio para pantalla completa que aparece cada 5 minutos -->
+    <div class="floating-ad-3" id="floatingAd3">
+        <div class="close-btn" onclick="document.getElementById('floatingAd3').style.display='none'">✕</div>
+        <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
+        <div id="container-2537ae2ea8b16bc9e554273a94dfd098"></div>
+    </div>
+    
+    <div class="floating-ad-4" id="floatingAd4">
+        <div class="close-btn" onclick="document.getElementById('floatingAd4').style.display='none'">✕</div>
+        <script type='text/javascript' src='//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js'></script>
+    </div>
+    
+    <!-- Anuncio para pantalla completa que aparece cada 3 minutos -->
     <div class="fullscreen-ad" id="fullscreenAd">
         <div class="close-btn" onclick="cerrarAnuncioFullscreen()">✕</div>
         <script type="text/javascript">
             atOptions = {
                 'key' : 'a55c7cdc78df0520f71c2b00e4046167',
                 'format' : 'iframe',
-                'height' : 300,
-                'width' : 160,
+                'height' : 250,
+                'width' : 300,
                 'params' : {}
             };
         </script>
         <script type="text/javascript" src="//www.highperformanceformat.com/a55c7cdc78df0520f71c2b00e4046167/invoke.js"></script>
+    </div>
+    
+    <!-- Anuncio de pantalla completa grande que aparece al inicio y cada 10 minutos -->
+    <div class="fullscreen-ad-large" id="fullscreenAdLarge">
+        <div class="close-btn" onclick="cerrarAnuncioFullscreenLarge()">✕</div>
+        <script type="text/javascript">
+            atOptions = {
+                'key' : 'b330ccd204185aee9ef640adccf896d2',
+                'format' : 'iframe',
+                'height' : 300,
+                'width' : 600,
+                'params' : {}
+            };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/b330ccd204185aee9ef640adccf896d2/invoke.js"></script>
+    </div>
+    
+    <!-- Detector de AdBlock -->
+    <div class="adb-wrapper" id="adBlockDetected">
+        <div class="adb-content">
+            <h2>AdBlock Detectado</h2>
+            <p>Por favor, desactive su bloqueador de anuncios para continuar disfrutando de nuestro contenido.</p>
+            <p>Nuestros anuncios nos ayudan a mantener este servicio gratuito.</p>
+            <button onclick="document.getElementById('adBlockDetected').style.display='none'" style="padding: 10px 20px; margin-top: 20px; cursor: pointer;">Continuar de todos modos</button>
+        </div>
     </div>
     
     <script>
@@ -386,11 +608,43 @@
         const backToEvents = document.getElementById('backToEvents');
         const noVideoContent = document.getElementById('noVideoContent');
         const fullscreenAd = document.getElementById('fullscreenAd');
+        const fullscreenAdLarge = document.getElementById('fullscreenAdLarge');
+        const prerollAd = document.getElementById('prerollAd');
+        const prerollSkip = document.getElementById('prerollSkip');
+        const prerollTimer = document.getElementById('prerollTimer');
         
         let hls = null;
         let fullscreenAdTimer = null;
+        let fullscreenAdLargeTimer = null;
         let isFullscreen = false;
         let adShowing = false;
+        let prerollTimerInterval = null;
+        let prerollTimeLeft = 10;
+        
+        // Detectar AdBlock (simulación simple)
+        setTimeout(function() {
+            // Código de detección simple de AdBlock
+            const testAd = document.createElement('div');
+            testAd.innerHTML = '&nbsp;';
+            testAd.className = 'adsbox';
+            testAd.style.position = 'absolute';
+            testAd.style.fontSize = '0px';
+            document.body.appendChild(testAd);
+            
+            setTimeout(function() {
+                if (testAd.offsetHeight === 0) {
+                    document.getElementById('adBlockDetected').style.display = 'flex';
+                }
+                testAd.remove();
+            }, 100);
+        }, 2000);
+        
+        // Mostrar el anuncio de pantalla completa grande al iniciar
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                fullscreenAdLarge.style.display = 'block';
+            }, 500);
+        });
         
         // Crear la lista de eventos con anuncios intercalados
         eventos.forEach((evento, index) => {
@@ -400,8 +654,8 @@
             eventoElement.addEventListener('click', () => reproducirEvento(index));
             eventList.appendChild(eventoElement);
             
-            // Insertar anuncio después de cada 2 eventos (incrementado frecuencia)
-            if ((index + 1) % 2 === 0 && index < eventos.length - 1) {
+            // Insertar anuncio después de cada evento (incrementado frecuencia)
+            if ((index + 1) % 1 === 0 && index < eventos.length - 1) {
                 const adDiv = document.createElement('div');
                 adDiv.className = 'ad-between-events';
                 adDiv.innerHTML = '<script type="text/javascript" src="//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js"><\/script>';
@@ -413,6 +667,35 @@
             // Ocultar contenido de no video y mostrar el contenedor de video
             noVideoContent.style.display = 'none';
             videoContainer.style.display = 'block';
+            
+            // Mostrar anuncio preroll
+            prerollAd.style.display = 'block';
+            prerollTimeLeft = 10;
+            prerollTimer.textContent = prerollTimeLeft;
+            
+            // Temporizador para saltar anuncio
+            clearInterval(prerollTimerInterval);
+            prerollTimerInterval = setInterval(function() {
+                prerollTimeLeft--;
+                prerollTimer.textContent = prerollTimeLeft;
+                
+                if (prerollTimeLeft <= 0) {
+                    clearInterval(prerollTimerInterval);
+                    prerollAd.style.display = 'none';
+                    prerollSkip.style.display = 'none';
+                    iniciarReproduccion(index);
+                }
+            }, 1000);
+            
+            // Permitir saltar después de 5 segundos
+            setTimeout(function() {
+                prerollSkip.style.display = 'block';
+                prerollSkip.addEventListener('click', function() {
+                    clearInterval(prerollTimerInterval);
+                    prerollAd.style.display = 'none';
+                    iniciarReproduccion(index);
+                });
+            }, 5000);
             
             // En móvil, esconder la lista de eventos y mostrar el botón de volver
             if (window.innerWidth <= 992) {
@@ -426,7 +709,9 @@
             // Actualizar estilo de selección
             document.querySelectorAll('.event').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.event')[index].classList.add('active');
-            
+        }
+        
+        function iniciarReproduccion(index) {
             // Detener cualquier reproducción existente y temporizador de anuncios
             if (hls) {
                 hls.destroy();
@@ -434,6 +719,7 @@
             }
             
             clearInterval(fullscreenAdTimer);
+            clearInterval(fullscreenAdLargeTimer);
             
             const evento = eventos[index];
             status.textContent = `Cargando: ${evento.titulo}...`;
@@ -447,8 +733,9 @@
                     status.textContent = `Reproduciendo: ${evento.titulo}`;
                     video.play();
                     
-                    // Iniciar temporizador para anuncios durante la reproducción
+                    // Iniciar temporizadores para anuncios durante la reproducción
                     startFullscreenAdTimer();
+                    startFullscreenAdLargeTimer();
                 });
                 hls.on(Hls.Events.ERROR, (event, data) => {
                     status.textContent = `Error al cargar el evento: ${data.type}`;
@@ -460,8 +747,9 @@
                    status.textContent = `Reproduciendo: ${evento.titulo}`;
                     video.play();
                     
-                    // Iniciar temporizador para anuncios durante la reproducción
+                    // Iniciar temporizadores para anuncios durante la reproducción
                     startFullscreenAdTimer();
+                    startFullscreenAdLargeTimer();
                 });
             } else {
                 status.textContent = "Su navegador no es compatible con la reproducción HLS.";
@@ -480,6 +768,7 @@
                 video.pause();
             }
             clearInterval(fullscreenAdTimer);
+            clearInterval(fullscreenAdLargeTimer);
             
             // En móvil, desplazar hacia arriba para ver la lista completa
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -496,12 +785,25 @@
                           !!document.webkitFullscreenElement || 
                           !!document.mozFullScreenElement ||
                           !!document.msFullscreenElement;
+                          
+            // Mostrar anuncio cuando se entra o sale de pantalla completa
+            if (!adShowing) {
+                showFullscreenAd();
+            }
         }
         
-        // Iniciar temporizador para mostrar anuncios cada 5 minutos
+        // Iniciar temporizador para mostrar anuncios cada 3 minutos
         function startFullscreenAdTimer() {
             clearInterval(fullscreenAdTimer);
-            fullscreenAdTimer = setInterval(showFullscreenAd, 5 * 60 * 1000); // 5 minutos
+            // Mostrar el primer anuncio después de 30 segundos
+            setTimeout(showFullscreenAd, 30000);
+            fullscreenAdTimer = setInterval(showFullscreenAd, 3 * 60 * 1000); // 3 minutos
+        }
+        
+        // Iniciar temporizador para mostrar anuncios grandes cada 10 minutos
+        function startFullscreenAdLargeTimer() {
+            clearInterval(fullscreenAdLargeTimer);
+            fullscreenAdLargeTimer = setInterval(showFullscreenAdLarge, 10 * 60 * 1000); // 10 minutos
         }
         
         // Mostrar anuncio durante la reproducción
@@ -519,6 +821,38 @@
                 if (!video.paused) {
                     // No pausamos el video, permitimos que siga reproduciéndose
                 }
+                
+                // Cerrar automáticamente después de 15 segundos
+                setTimeout(function() {
+                    if (fullscreenAd.style.display === 'block') {
+                        cerrarAnuncioFullscreen();
+                    }
+                }, 15000);
+            }
+        }
+        
+        // Mostrar anuncio grande durante la reproducción
+        function showFullscreenAdLarge() {
+            if (!adShowing && video.currentTime > 0) {
+                adShowing = true;
+                fullscreenAdLarge.style.display = 'block';
+                
+                // Reposicionar el anuncio si estamos en pantalla completa
+                if (isFullscreen) {
+                    fullscreenAdLarge.style.zIndex = 9999;
+                }
+                
+                // Si el reproductor está en pausa, no lo reiniciamos
+                if (!video.paused) {
+                    // No pausamos el video, permitimos que siga reproduciéndose
+                }
+                
+                // Cerrar automáticamente después de 20 segundos
+                setTimeout(function() {
+                    if (fullscreenAdLarge.style.display === 'block') {
+                        cerrarAnuncioFullscreenLarge();
+                    }
+                }, 20000);
             }
         }
         
@@ -528,27 +862,52 @@
             adShowing = false;
         }
         
+        // Cerrar anuncio grande de pantalla completa
+        function cerrarAnuncioFullscreenLarge() {
+            fullscreenAdLarge.style.display = 'none';
+            adShowing = false;
+        }
+        
         // Crear y mostrar anuncios flotantes adicionales de forma aleatoria
         function mostrarAnunciosFlotantesAleatorios() {
-            // Recrear el anuncio flotante principal cada cierto tiempo si fue cerrado
+            // Recrear todos los anuncios flotantes cada cierto tiempo si fueron cerrados
             setInterval(() => {
                 if (document.getElementById('floatingAd').style.display === 'none') {
                     document.getElementById('floatingAd').style.display = 'block';
                 }
-            }, 120000); // Cada 2 minutos
+            }, 90000); // Cada 1.5 minutos
             
-            // Recrear el segundo anuncio flotante cada cierto tiempo si fue cerrado
             setInterval(() => {
                 if (document.getElementById('floatingAd2').style.display === 'none') {
                     document.getElementById('floatingAd2').style.display = 'block';
                 }
+            }, 120000); // Cada 2 minutos
+            
+            setInterval(() => {
+                if (document.getElementById('floatingAd3').style.display === 'none') {
+                    document.getElementById('floatingAd3').style.display = 'block';
+                }
+            }, 150000); // Cada 2.5 minutos
+            
+            setInterval(() => {
+                if (document.getElementById('floatingAd4').style.display === 'none') {
+                    document.getElementById('floatingAd4').style.display = 'block';
+                }
             }, 180000); // Cada 3 minutos
         }
         
-        // Iniciar anuncios flotantes aleatorios
-        mostrarAnunciosFlotantesAleatorios();
+        // Mostrar anuncios durante la reproducción del video en momentos específicos
+        video.addEventListener('timeupdate', function() {
+            // Mostrar anuncios en momentos específicos del video
+            if (video.currentTime > 60 && video.currentTime < 65) {
+                showFullscreenAd();
+            }
+            else if (video.currentTime > 300 && video.currentTime < 305) {
+                showFullscreenAdLarge();
+            }
+        });
         
-        // Ajustar la visualización si cambia el tamaño de la ventana
+        // Reposicionar anuncios flotantes cuando se redimensiona la ventana
         window.addEventListener('resize', function() {
             if (window.innerWidth > 992) {
                 contentArea.classList.remove('video-active');
@@ -559,9 +918,33 @@
             }
         });
         
+        // Iniciar anuncios flotantes aleatorios
+        mostrarAnunciosFlotantesAleatorios();
+        
         // Asegurarnos de que el contenido de no video esté visible al inicio
         videoContainer.style.display = 'none';
         noVideoContent.style.display = 'block';
+        
+        // Mantener un seguimiento de actividad para mostrar anuncios periódicamente
+        let inactivityTimer = null;
+        
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(function() {
+                // Mostrar anuncio después de 2 minutos de inactividad
+                if (!adShowing) {
+                    showFullscreenAdLarge();
+                }
+            }, 2 * 60 * 1000);
+        }
+        
+        // Eventos para detectar actividad del usuario
+        document.addEventListener('mousemove', resetInactivityTimer);
+        document.addEventListener('keydown', resetInactivityTimer);
+        document.addEventListener('click', resetInactivityTimer);
+        
+        // Iniciar el temporizador de inactividad
+        resetInactivityTimer();
     </script>
 </body>
 </html>
