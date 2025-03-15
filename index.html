@@ -8,15 +8,16 @@
     <style>
         body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; }
         h1 { color: #333; text-align: center; margin-bottom: 20px; }
-        #videoContainer { margin: 20px 0; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        video { width: 100%; background: #000; border-radius: 4px; }
         
         /* Lista horizontal */
+        .event-list-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
         .event-list { 
             display: flex; 
             overflow-x: auto;
             padding: 10px 0;
-            margin-bottom: 20px;
             gap: 15px;
             scrollbar-width: thin;
         }
@@ -36,89 +37,131 @@
         .event:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
         .event.active { border-color: #007bff; background-color: #e0f0ff; }
         
+        #videoContainer { 
+            margin: 0 0 15px 0; 
+            background: #fff; 
+            padding: 15px; 
+            border-radius: 8px; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+            position: relative;
+        }
+        video { width: 100%; background: #000; border-radius: 4px; }
         .status { margin-top: 10px; font-style: italic; color: #666; }
         
-        /* Contenedor de anuncios */
+        /* Contenedores de anuncios */
+        .ad-banner-top {
+            margin-bottom: 15px;
+            text-align: center;
+            overflow: hidden;
+        }
+        
+        .ad-inline {
+            margin: 15px 0;
+            text-align: center;
+            clear: both;
+        }
+        
         .ad-container {
             display: flex;
+            justify-content: center;
             flex-wrap: wrap;
-            gap: 20px;
-            justify-content: space-between;
-            margin: 30px 0;
+            gap: 10px;
+            margin: 15px 0;
         }
         
-        /* Estilos de anuncios */
-        .ad-unit {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-            flex: 1;
-            min-width: 300px;
-            margin-bottom: 20px;
-        }
-        .ad-unit:hover { transform: translateY(-5px); }
-        .ad-label {
-            background-color: #f0f0f0;
-            color: #666;
-            font-size: 12px;
-            padding: 2px 8px;
+        .ad-link {
             display: inline-block;
-            margin-bottom: 5px;
+            padding: 8px 12px;
+            background-color: #f0f0f0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 5px;
+            transition: background-color 0.3s;
         }
-        .ad-content {
-            padding: 15px;
-            text-align: center;
+        .ad-link:hover {
+            background-color: #e0e0e0;
         }
-        .ad-banner {
-            width: 100%;
-            height: 120px;
-            background-color: #eaeaea;
+        
+        /* Anuncios sobre el video */
+        .video-overlay-ad {
+            position: absolute;
+            bottom: 70px;
+            right: 20px;
+            background: rgba(255,255,255,0.8);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        /* Contenedor para anuncios debajo del estado */
+        .status-container {
+            position: relative;
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-            color: #666;
+            justify-content: space-between;
         }
         
-        /* Banner adherido inferior para móviles */
-        .sticky-banner {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #fff;
-            padding: 10px;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            z-index: 100;
-            display: none;
-        }
-        
+        /* Para dispositivos móviles */
         @media (max-width: 768px) {
-            .sticky-banner { display: block; }
-            body { padding-bottom: 70px; }
+            .ad-banner-top iframe {
+                width: 100% !important;
+                height: auto !important;
+                min-height: 50px;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Eventos en Vivo</h1>
     
-    <div class="event-list" id="eventList"></div>
+    <!-- Anuncio banner superior -->
+    <div class="ad-banner-top">
+        <script type="text/javascript">
+            atOptions = {
+                'key' : 'b330ccd204185aee9ef640adccf896d2',
+                'format' : 'iframe',
+                'height' : 90,
+                'width' : 728,
+                'params' : {}
+            };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/b330ccd204185aee9ef640adccf896d2/invoke.js"></script>
+    </div>
+    
+    <div class="event-list-container">
+        <div class="event-list" id="eventList"></div>
+    </div>
+    
+    <!-- Anuncio en línea entre eventos y video -->
+    <div class="ad-inline">
+        <script type='text/javascript' src='//pl26063313.effectiveratecpm.com/93/61/3d/93613d042ce505fe468e829efbb21520.js'></script>
+    </div>
     
     <div id="videoContainer">
         <video id="video" controls></video>
-        <div class="status" id="status">Seleccione un evento para comenzar</div>
+        
+        <!-- Anuncio superpuesto sobre el video -->
+        <div class="video-overlay-ad">
+            <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank">Ver contenido premium</a>
+        </div>
+        
+        <div class="status-container">
+            <div class="status" id="status">Seleccione un evento para comenzar</div>
+            
+            <!-- Anuncio pequeño junto al estado -->
+            <div>
+                <a href="https://www.effectiveratecpm.com/wy4ysndt?key=12c98d265ef2e657283053a557f43edd" target="_blank" class="ad-link">Contenido recomendado</a>
+            </div>
+        </div>
     </div>
     
-    <!-- Anuncios debajo de eventos -->
-    <div class="ad-container" id="adContainer"></div>
-    
-    <!-- Banner adherido para móviles -->
-    <div class="sticky-banner">
-        <div class="ad-label">Anuncio</div>
-        <div>Descubre contenido premium - ¡Haz clic aquí!</div>
+    <!-- Anuncio contenedor debajo del video -->
+    <div class="ad-container">
+        <script async="async" data-cfasync="false" src="//pl26063295.effectiveratecpm.com/2537ae2ea8b16bc9e554273a94dfd098/invoke.js"></script>
+        <div id="container-2537ae2ea8b16bc9e554273a94dfd098"></div>
     </div>
     
     <script>
@@ -131,19 +174,9 @@
             { titulo: "Deportes", url: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" }
         ];
         
-        // Lista de anuncios de ejemplo
-        const anuncios = [
-            { titulo: "Suscripción Premium", descripcion: "Accede a todos los eventos sin restricciones" },
-            { titulo: "Nueva Colección Deportiva", descripcion: "Las mejores ofertas para tus actividades favoritas" },
-            { titulo: "Viajes y Aventuras", descripcion: "Descubre destinos increíbles a precios especiales" },
-            { titulo: "Tecnología Avanzada", descripcion: "Los mejores dispositivos para tu entretenimiento" },
-            { titulo: "Promoción Especial", descripcion: "Tiempo limitado: 50% de descuento en membresías" }
-        ];
-        
         const video = document.getElementById('video');
         const status = document.getElementById('status');
         const eventList = document.getElementById('eventList');
-        const adContainer = document.getElementById('adContainer');
         let hls = null;
         
         // Crear la lista de eventos
@@ -155,22 +188,12 @@
             eventList.appendChild(eventoElement);
         });
         
-        // Crear anuncios
-        anuncios.forEach((anuncio) => {
-            const adElement = document.createElement('div');
-            adElement.className = 'ad-unit';
-            adElement.innerHTML = `
-                <div class="ad-banner">Banner Publicitario</div>
-                <div class="ad-content">
-                    <div class="ad-label">Anuncio</div>
-                    <h3>${anuncio.titulo}</h3>
-                    <p>${anuncio.descripcion}</p>
-                </div>
-            `;
-            adElement.addEventListener('click', () => {
-                alert('Anuncio clickeado: ' + anuncio.titulo);
-            });
-            adContainer.appendChild(adElement);
+        // Cargar script de anuncios adicional
+        window.addEventListener('load', function() {
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = '//pl26063307.effectiveratecpm.com/19/09/91/1909913ee893cee324321a2b56c090fa.js';
+            document.body.appendChild(script);
         });
         
         function reproducirEvento(index) {
